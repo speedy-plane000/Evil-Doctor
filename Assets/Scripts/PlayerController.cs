@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// FPS-контроллер игрока: движение WASD + мышь для поворота камеры.
@@ -34,8 +35,9 @@ public class PlayerController : MonoBehaviour
 
     void Look()
     {
-        float mx = Input.GetAxis("Mouse X") * mouseSensitivity;
-        float my = Input.GetAxis("Mouse Y") * mouseSensitivity;
+        Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+        float mx = mouseDelta.x * mouseSensitivity;
+        float my = mouseDelta.y * mouseSensitivity;
 
         _pitch -= my;
         _pitch  = Mathf.Clamp(_pitch, -80f, 80f);
@@ -49,8 +51,9 @@ public class PlayerController : MonoBehaviour
         if (_cc.isGrounded && _yVelocity < 0f)
             _yVelocity = -2f;
 
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
+        var kb = Keyboard.current;
+        float h = (kb.dKey.isPressed ? 1f : 0f) - (kb.aKey.isPressed ? 1f : 0f);
+        float v = (kb.wKey.isPressed ? 1f : 0f) - (kb.sKey.isPressed ? 1f : 0f);
 
         Vector3 move = transform.right * h + transform.forward * v;
         move = Vector3.ClampMagnitude(move, 1f);
