@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
 
     CharacterController _cc;
     float _yVelocity;
-    float _pitch;          // вертикальный угол камеры
+    float _pitch;
 
     void Start()
     {
@@ -59,17 +59,5 @@ public class PlayerController : MonoBehaviour
 
         Vector3 velocity = move * moveSpeed + Vector3.up * _yVelocity;
         _cc.Move(velocity * Time.deltaTime);
-    }
-
-    /// <summary>
-    /// Мгновенная телепортация без физических артефактов CharacterController.
-    /// Вызывается CheckpointManager.
-    /// </summary>
-    public void Teleport(Vector3 position)
-    {
-        _cc.enabled = false;
-        transform.position = position;
-        _cc.enabled = true;
-        _yVelocity = 0f;
     }
 }
