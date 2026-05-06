@@ -15,14 +15,6 @@ public class MouseLook : MonoBehaviour
 
     void Start()
     {
-        // Force first-person position: camera must sit directly above player pivot
-        // with no X/Z offset so it rotates in place rather than orbiting.
-        Vector3 lp = transform.localPosition;
-        lp.x = 0f;
-        lp.z = 0f;
-        if (lp.y == 0f) lp.y = eyeHeight;
-        transform.localPosition = lp;
-
         currentYRotation = playerBody.eulerAngles.y;
         targetYRotation = currentYRotation;
         Cursor.lockState = CursorLockMode.Locked;
