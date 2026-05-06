@@ -13,16 +13,23 @@ public class MouseLook : MonoBehaviour
     private float currentYRotation = 0f;
     private float targetYRotation = 0f;
 
+    void Awake()
+    {
+        // Attach the camera to the player so it follows their in-scene position.
+        transform.SetParent(playerBody);
+        // Place it at eye level with no lateral offset (true first-person).
+        transform.localPosition = new Vector3(0f, eyeHeight, 0f);
+        transform.localRotation = Quaternion.identity;
+
+        // A tiny near clip plane stops geometry from disappearing when the
+        // player stands close to a wall.
+        Camera cam = GetComponent<Camera>();
+        if (cam != null)
+            cam.nearClipPlane = 0.01f;
+    }
+
     void Start()
     {
-        // Force first-person position: camera must sit directly above player pivot
-        // with no X/Z offset so it rotates in place rather than orbiting.
-        Vector3 lp = transform.localPosition;
-        lp.x = 0f;
-        lp.z = 0f;
-        if (lp.y == 0f) lp.y = eyeHeight;
-        transform.localPosition = lp;
-
         currentYRotation = playerBody.eulerAngles.y;
         targetYRotation = currentYRotation;
         Cursor.lockState = CursorLockMode.Locked;
