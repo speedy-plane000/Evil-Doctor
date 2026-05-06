@@ -25,7 +25,7 @@ public class MouseLook : MonoBehaviour
         // player stands close to a wall.
         Camera cam = GetComponent<Camera>();
         if (cam != null)
-            cam.nearClipPlane = 0.01f;
+            cam.nearClipPlane = 0.05f;
     }
 
     void Start()
