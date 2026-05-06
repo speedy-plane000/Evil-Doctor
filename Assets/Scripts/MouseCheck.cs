@@ -6,6 +6,7 @@ public class MouseLook : MonoBehaviour
     [Range(1f, 30f)]
     public float smoothing = 10f;
     public Transform playerBody;
+    public float eyeHeight = 1.6f;
 
     private float xRotation = 0f;
     private float currentXRotation = 0f;
@@ -14,6 +15,14 @@ public class MouseLook : MonoBehaviour
 
     void Start()
     {
+        // Force first-person position: camera must sit directly above player pivot
+        // with no X/Z offset so it rotates in place rather than orbiting.
+        Vector3 lp = transform.localPosition;
+        lp.x = 0f;
+        lp.z = 0f;
+        if (lp.y == 0f) lp.y = eyeHeight;
+        transform.localPosition = lp;
+
         currentYRotation = playerBody.eulerAngles.y;
         targetYRotation = currentYRotation;
         Cursor.lockState = CursorLockMode.Locked;

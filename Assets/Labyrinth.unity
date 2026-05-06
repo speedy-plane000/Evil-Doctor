@@ -9367,7 +9367,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ef1994f40f757a4da902f18df76d50f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MouseLook
-  mouseSensitivity: 400
+  mouseSensitivity: 100
   playerBody: {fileID: 792478913}
 --- !u!114 &664390910
 MonoBehaviour:
@@ -9452,7 +9452,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.05
+  near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
   orthographic: 0
