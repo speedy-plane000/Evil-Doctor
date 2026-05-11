@@ -7416,6 +7416,166 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 471614407}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &478404385
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 478404387}
+  - component: {fileID: 478404386}
+  m_Layer: 0
+  m_Name: lever
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &478404386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 478404385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c602dcd3ab6050419c573de295a6257, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActivationStation
+  scriptNote: Activation Station - By Paul Dela Cruz
+  maximizedScript: 1
+  activationStyleIndex: 0
+  activationStyles:
+  - The Checklist
+  - Whichever Works...
+  - Follow the Leader!
+  - Always Rebel!
+  - Mouse Activation
+  - Keyboard Activation
+  inputConditionIndex: 0
+  inputConditions:
+  - Press
+  - Hold
+  - Release
+  keyButtonCondition: 
+  mouseButtonConditionIndex: 0
+  mouseButtonConditions:
+  - Left MB
+  - Right MB
+  - Middle MB
+  locationButtonConditionIndex: 0
+  locationButtonConditions:
+  - On Anywhere
+  - On This
+  - Not on This
+  mouseInputStatus: 
+  mouseButtonStatus: 
+  mouseLocationStatus: Not on This
+  keyInputStatus: 
+  keyButtonStatus: 
+  keyLocationStatus: Not on This
+  conditionCount: 0
+  conditionsMet: 0
+  originalCountdown: 0
+  currentCountdown: 0
+  numOfCycles: 0
+  finalPersistence: 1
+  mouseInputSuccess: 0
+  mouseButtonSuccess: 0
+  mouseLocationSuccess: 0
+  keyInputSuccess: 0
+  keyLocationSuccess: 0
+  noConsequences: 1
+  condition1Status: 0
+  condition2Status: 0
+  condition3Status: 0
+  condition4Status: 0
+  condition5Status: 0
+  condition6Status: 0
+  condition7Status: 0
+  condition8Status: 0
+  condition9Status: 0
+  impact1Status: 0
+  impact2Status: 0
+  impact3Status: 0
+  impact4Status: 0
+  impact5Status: 0
+  impact6Status: 0
+  impact7Status: 0
+  impact8Status: 0
+  impact9Status: 0
+  consequence1Status: 0
+  consequence2Status: 0
+  consequence3Status: 0
+  consequence4Status: 0
+  consequence5Status: 0
+  consequence6Status: 0
+  consequence7Status: 0
+  consequence8Status: 0
+  consequence9Status: 0
+  ifObject1: {fileID: 0}
+  ifObject2: {fileID: 0}
+  ifObject3: {fileID: 0}
+  ifObject4: {fileID: 0}
+  ifObject5: {fileID: 0}
+  ifObject6: {fileID: 0}
+  ifObject7: {fileID: 0}
+  ifObject8: {fileID: 0}
+  ifObject9: {fileID: 0}
+  isActivation1: 0
+  isActivation2: 0
+  isActivation3: 0
+  isActivation4: 0
+  isActivation5: 0
+  isActivation6: 0
+  isActivation7: 0
+  isActivation8: 0
+  isActivation9: 0
+  setObject1: {fileID: 0}
+  setObject2: {fileID: 0}
+  setObject3: {fileID: 0}
+  setObject4: {fileID: 0}
+  setObject5: {fileID: 0}
+  setObject6: {fileID: 0}
+  setObject7: {fileID: 0}
+  setObject8: {fileID: 0}
+  setObject9: {fileID: 0}
+  toActivation1: 0
+  toActivation2: 0
+  toActivation3: 0
+  toActivation4: 0
+  toActivation5: 0
+  toActivation6: 0
+  toActivation7: 0
+  toActivation8: 0
+  toActivation9: 0
+  elseToActivation1: 0
+  elseToActivation2: 0
+  elseToActivation3: 0
+  elseToActivation4: 0
+  elseToActivation5: 0
+  elseToActivation6: 0
+  elseToActivation7: 0
+  elseToActivation8: 0
+  elseToActivation9: 0
+--- !u!4 &478404387
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 478404385}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -4.6367, y: 4.5514, z: -4.9204}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &483041214
 GameObject:
   m_ObjectHideFlags: 0
@@ -9349,7 +9509,7 @@ Transform:
   m_GameObject: {fileID: 664390907}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -8}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11348,8 +11508,8 @@ Transform:
   m_GameObject: {fileID: 792478910}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -5.426, y: 3.611, z: -5.14}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 664390908}
@@ -16086,7 +16246,7 @@ Transform:
   m_GameObject: {fileID: 1067293682}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -8}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -19728,7 +19888,7 @@ Transform:
   m_GameObject: {fileID: 1328675720}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -8}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -34193,3 +34353,4 @@ SceneRoots:
   - {fileID: 792478913}
   - {fileID: 314452335}
   - {fileID: 1168749993}
+  - {fileID: 478404387}
