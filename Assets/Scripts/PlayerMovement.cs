@@ -38,24 +38,11 @@ public class PlayerMovement : MonoBehaviour
 
     private float stepTimer;
     public Transform mainCamera;
-    private float defaultWalkSpeed;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        defaultWalkSpeed = walkSpeed;
-
-        ApplyControllerHeight(standHeight);
-
-        if (mainCamera == null)
-        {
-            Camera cam = GetComponentInChildren<Camera>();
-            if (cam != null)
-                mainCamera = cam.transform;
-        }
-
-        if (mainCamera != null)
-            defaultYPos = mainCamera.localPosition.y;
+        defaultYPos = mainCamera.transform.localPosition.y;
     }
 
     void Update()
@@ -131,10 +118,9 @@ public class PlayerMovement : MonoBehaviour
 
     void PlaySurfaceSpecificSound()
     {
-        if (footstepAudio == null)
-            return;
+        RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 1.5f))
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 1.5f))
         {
             switch (hit.collider.tag)
             {
@@ -159,44 +145,33 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             isCrouching = true;
-            ApplyControllerHeight(crouchHeight);
-            walkSpeed = crouchSpeed; 
+            controller.height = crouchHeight;
+            walkSpeed = crouchSpeed;
         }
 
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             isCrouching = false;
-            ApplyControllerHeight(standHeight);
-            walkSpeed = defaultWalkSpeed;
+            controller.height = standHeight;
+            walkSpeed = 5f;
         }
     }
 
     void HandleHeadBob()
     {
-        if (mainCamera == null)
-            return;
-        
         if (!isGrounded || (Input.GetAxis("Horizontal") == 0 && Input.GetAxis("Vertical") == 0))
         {
             timer = 0;
-            Vector3 newPos = mainCamera.localPosition;
+            Vector3 newPos = mainCamera.transform.localPosition;
             newPos.y = Mathf.Lerp(newPos.y, defaultYPos, Time.deltaTime * 5f);
-            mainCamera.localPosition = newPos;
+            mainCamera.transform.localPosition = newPos;
             return;
         }
 
         timer += Time.deltaTime * (isCrouching ? bobFrequency * 0.5f : bobFrequency);
-        Vector3 pos = mainCamera.localPosition;
+        Vector3 pos = mainCamera.transform.localPosition;
         pos.y = defaultYPos + Mathf.Sin(timer) * (isCrouching ? bobAmount * 0.5f : bobAmount);
-        mainCamera.localPosition = pos;
-    }
-
-    void ApplyControllerHeight(float targetHeight)
-    {
-        controller.height = targetHeight;
-        Vector3 center = controller.center;
-        center.y = targetHeight * 0.5f;
-        controller.center = center;
+        mainCamera.transform.localPosition = pos;
     }
 
     public void ResetVerticalVelocity()
