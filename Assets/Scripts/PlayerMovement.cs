@@ -4,9 +4,9 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Crouch")]
-    public float crouchHeight = 1f; 
-    public float standHeight = 2f;  
-    public float crouchSpeed = 2.5f; 
+    public float crouchHeight = 1f;
+    public float standHeight = 2f;
+    public float crouchSpeed = 2.5f;
     private bool isCrouching;
 
     [Header("Movement")]
@@ -24,10 +24,10 @@ public class PlayerMovement : MonoBehaviour
     public AudioClip grassSound;
 
     [Header("Head Bobbing")]
-    public float bobFrequency = 5f;  
-    public float bobAmount = 0.05f;   
-    private float defaultYPos;        
-    private float timer = 0;
+    public float bobFrequency = 5f;
+    public float bobAmount = 0.05f;
+    private float defaultYPos;  
+    private float timer = 0f;
 
     private CharacterController controller;
     private Vector3 velocity;
@@ -38,11 +38,24 @@ public class PlayerMovement : MonoBehaviour
 
     private float stepTimer;
     public Transform mainCamera;
+    private float defaultWalkSpeed;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        defaultYPos = mainCamera.transform.localPosition.y;
+        defaultWalkSpeed = walkSpeed;
+
+        ApplyControllerHeight(standHeight);
+
+        if (mainCamera == null)
+        {
+            Camera cam = GetComponentInChildren<Camera>();
+            if (cam != null)
+                mainCamera = cam.transform;
+        }
+
+        if (mainCamera != null)
+            defaultYPos = mainCamera.localPosition.y;
     }
 
     void Update()
@@ -118,21 +131,24 @@ public class PlayerMovement : MonoBehaviour
 
     void PlaySurfaceSpecificSound()
     {
-        RaycastHit hit;
-        
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 1.5f))
+        if (footstepAudio == null)
+            return;
+
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 1.5f))
         {
-            
             switch (hit.collider.tag)
             {
                 case "Concrete":
-                    footstepAudio.PlayOneShot(concreteSound);
+                    if (concreteSound != null)
+                        footstepAudio.PlayOneShot(concreteSound);
                     break;
                 case "grass":
-                    footstepAudio.PlayOneShot(grassSound);
+                    if (grassSound != null)
+                        footstepAudio.PlayOneShot(grassSound);
                     break;
                 default:
-                    footstepAudio.PlayOneShot(concreteSound);
+                    if (concreteSound != null)
+                        footstepAudio.PlayOneShot(concreteSound);
                     break;
             }
         }
@@ -140,44 +156,51 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleCrouch()
     {
-        
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             isCrouching = true;
-            controller.height = crouchHeight;
+            ApplyControllerHeight(crouchHeight);
             walkSpeed = crouchSpeed; 
         }
 
-        
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             isCrouching = false;
-            controller.height = standHeight;
-            walkSpeed = 5f; 
+            ApplyControllerHeight(standHeight);
+            walkSpeed = defaultWalkSpeed;
         }
     }
 
     void HandleHeadBob()
     {
+        if (mainCamera == null)
+            return;
         
         if (!isGrounded || (Input.GetAxis("Horizontal") == 0 && Input.GetAxis("Vertical") == 0))
         {
             timer = 0;
-            Vector3 newPos = mainCamera.transform.localPosition;
+            Vector3 newPos = mainCamera.localPosition;
             newPos.y = Mathf.Lerp(newPos.y, defaultYPos, Time.deltaTime * 5f);
-            mainCamera.transform.localPosition = newPos;
+            mainCamera.localPosition = newPos;
             return;
         }
 
-        
         timer += Time.deltaTime * (isCrouching ? bobFrequency * 0.5f : bobFrequency);
-
-        Vector3 pos = mainCamera.transform.localPosition;
-        
+        Vector3 pos = mainCamera.localPosition;
         pos.y = defaultYPos + Mathf.Sin(timer) * (isCrouching ? bobAmount * 0.5f : bobAmount);
-        mainCamera.transform.localPosition = pos;
+        mainCamera.localPosition = pos;
     }
 
+    void ApplyControllerHeight(float targetHeight)
+    {
+        controller.height = targetHeight;
+        Vector3 center = controller.center;
+        center.y = targetHeight * 0.5f;
+        controller.center = center;
+    }
 
-
+    public void ResetVerticalVelocity()
+    {
+        velocity = Vector3.zero;
+    }
 }
