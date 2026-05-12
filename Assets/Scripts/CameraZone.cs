@@ -5,15 +5,20 @@ public class CameraZone : MonoBehaviour
 {
     public Color zoneColor = Color.red;
     public float emissionIntensity = 4f;
+    private Collider zoneCollider;
+    private Renderer zoneRenderer;
 
     void Reset()
     {
-        Collider zoneCollider = GetComponent<Collider>();
-        zoneCollider.isTrigger = true;
+        Collider colliderInEditor = GetComponent<Collider>();
+        if (colliderInEditor != null)
+            colliderInEditor.isTrigger = true;
     }
 
     void Awake()
     {
+        zoneCollider = GetComponent<Collider>();
+        zoneRenderer = GetComponent<Renderer>();
         ApplyVisuals();
     }
 
@@ -26,13 +31,26 @@ public class CameraZone : MonoBehaviour
         respawn.RespawnAtCheckpoint();
     }
 
+    public void SetZoneActive(bool isActive)
+    {
+        if (zoneCollider == null)
+            zoneCollider = GetComponent<Collider>();
+        if (zoneRenderer == null)
+            zoneRenderer = GetComponent<Renderer>();
+
+        if (zoneCollider != null)
+            zoneCollider.enabled = isActive;
+        if (zoneRenderer != null)
+            zoneRenderer.enabled = isActive;
+    }
+
     void ApplyVisuals()
     {
         Renderer renderer = GetComponent<Renderer>();
-        if (renderer == null)
+        if (zoneRenderer == null)
             return;
 
-        Material materialInstance = renderer.material;
+        Material materialInstance = zoneRenderer.material;
 
         if (materialInstance.HasProperty("_BaseColor"))
             materialInstance.SetColor("_BaseColor", zoneColor);
