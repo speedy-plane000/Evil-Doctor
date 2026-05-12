@@ -3797,7 +3797,7 @@ GameObject:
   - component: {fileID: 279212693}
   - component: {fileID: 279212692}
   - component: {fileID: 279212691}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3921,8 +3921,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 285811923}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.86364, y: -0.6686, z: 6.1997}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3931,7 +3931,7 @@ Transform:
   - {fileID: 2094386980}
   - {fileID: 1346974831}
   - {fileID: 1152821773}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1110418178}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &314452334
 GameObject:
@@ -3957,8 +3957,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 314452334}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.86364, y: -0.6686, z: 6.1997}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4049,7 +4049,7 @@ Transform:
   - {fileID: 377868338}
   - {fileID: 494876942}
   - {fileID: 354022726}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1110418178}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &324802727
 GameObject:
@@ -5631,7 +5631,7 @@ GameObject:
   - component: {fileID: 392675938}
   - component: {fileID: 392675937}
   - component: {fileID: 392675936}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8548,7 +8548,7 @@ GameObject:
   - component: {fileID: 592483263}
   - component: {fileID: 592483262}
   - component: {fileID: 592483261}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9820,7 +9820,7 @@ GameObject:
   - component: {fileID: 677246584}
   - component: {fileID: 677246583}
   - component: {fileID: 677246582}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9842,7 +9842,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -9932,7 +9932,7 @@ GameObject:
   - component: {fileID: 679523343}
   - component: {fileID: 679523342}
   - component: {fileID: 679523341}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11275,6 +11275,7 @@ GameObject:
   - component: {fileID: 792478913}
   - component: {fileID: 792478912}
   - component: {fileID: 792478911}
+  - component: {fileID: 792478914}
   m_Layer: 0
   m_Name: player
   m_TagString: Untagged
@@ -11294,14 +11295,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4522814ff6774845886016ae17c178e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  walkSpeed: 1.5
-  jumpHeight: 1.5
+  crouchHeight: 1
+  standHeight: 2
+  crouchSpeed: 2.5
+  walkSpeed: 3.5
+  jumpHeight: 0
   gravity: -9.81
   groundCheck: {fileID: 1067293683}
-  groundDistance: 0.4
+  groundDistance: 0.1
   groundMask:
     serializedVersion: 2
     m_Bits: 8
+  concreteSound: {fileID: 8300000, guid: 6bcf43123072f234c9554a094a42f800, type: 3}
+  grassSound: {fileID: 8300000, guid: 13c73b6f9b155e7448900eaa10cc130e, type: 3}
+  bobFrequency: 5
+  bobAmount: 0.05
+  footstepAudio: {fileID: 792478914}
+  stepDelay: 0.65
+  mainCamera: {fileID: 664390908}
 --- !u!143 &792478912
 CharacterController:
   m_ObjectHideFlags: 0
@@ -11320,8 +11331,8 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 0.4
-  m_Radius: 0.1
+  m_Height: 2
+  m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
@@ -11336,7 +11347,7 @@ Transform:
   m_GameObject: {fileID: 792478910}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -63.05, y: -2.2000008, z: 116}
+  m_LocalPosition: {x: -4.39, y: 1.77, z: -13.34}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -11345,6 +11356,103 @@ Transform:
   - {fileID: 1328675721}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &792478914
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 792478910}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 6bcf43123072f234c9554a094a42f800, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 0.3
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &804916988
 GameObject:
   m_ObjectHideFlags: 0
@@ -15613,7 +15721,7 @@ GameObject:
   - component: {fileID: 1042395250}
   - component: {fileID: 1042395249}
   - component: {fileID: 1042395248}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15725,7 +15833,7 @@ GameObject:
   - component: {fileID: 1043426518}
   - component: {fileID: 1043426517}
   - component: {fileID: 1043426516}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16074,7 +16182,7 @@ Transform:
   m_GameObject: {fileID: 1067293682}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.9, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16752,6 +16860,43 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1475217798}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1 &1110418177
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1110418178}
+  m_Layer: 0
+  m_Name: world
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1110418178
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110418177}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.86364, y: 0.6686, z: -6.1997}
+  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 285811924}
+  - {fileID: 1475217798}
+  - {fileID: 1953524433}
+  - {fileID: 314452335}
+  - {fileID: 1168749993}
+  - {fileID: 1133034362}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1111628032
 GameObject:
   m_ObjectHideFlags: 0
@@ -16876,7 +17021,7 @@ GameObject:
   - component: {fileID: 1123578279}
   - component: {fileID: 1123578278}
   - component: {fileID: 1123578277}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (9)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16988,7 +17133,7 @@ GameObject:
   - component: {fileID: 1127197843}
   - component: {fileID: 1127197842}
   - component: {fileID: 1127197841}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17321,11 +17466,11 @@ Transform:
   m_GameObject: {fileID: 1133034359}
   serializedVersion: 2
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: -0.86364, y: 2.3314, z: 6.1997}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1110418178}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1 &1142062902
 GameObject:
@@ -17787,7 +17932,7 @@ GameObject:
   - component: {fileID: 1161016919}
   - component: {fileID: 1161016918}
   - component: {fileID: 1161016917}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18023,8 +18168,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1168749992}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.86364, y: -0.6686, z: 6.1997}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -18033,7 +18178,7 @@ Transform:
   - {fileID: 100267663}
   - {fileID: 1337647625}
   - {fileID: 1185101574}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1110418178}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1174161115
 GameObject:
@@ -19716,8 +19861,8 @@ Transform:
   m_GameObject: {fileID: 1328675720}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 122.5, y: -15.7, z: -37.4}
-  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 792478913}
@@ -22685,8 +22830,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1475217797}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.86364, y: -0.6686, z: 6.1997}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -22798,7 +22943,7 @@ Transform:
   - {fileID: 334274915}
   - {fileID: 1782348469}
   - {fileID: 2080309588}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1110418178}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1481923554
 GameObject:
@@ -24569,7 +24714,7 @@ GameObject:
   - component: {fileID: 1576593004}
   - component: {fileID: 1576593003}
   - component: {fileID: 1576593002}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25689,7 +25834,7 @@ GameObject:
   - component: {fileID: 1648289465}
   - component: {fileID: 1648289464}
   - component: {fileID: 1648289463}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28347,7 +28492,7 @@ GameObject:
   - component: {fileID: 1798839807}
   - component: {fileID: 1798839806}
   - component: {fileID: 1798839805}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (8)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30027,9 +30172,9 @@ GameObject:
   - component: {fileID: 1912095474}
   - component: {fileID: 1912095473}
   - component: {fileID: 1912095472}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Base
-  m_TagString: Untagged
+  m_TagString: grass
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -30823,8 +30968,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1953524432}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.86364, y: -0.6686, z: 6.1997}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -30920,7 +31065,7 @@ Transform:
   - {fileID: 392751507}
   - {fileID: 1945389005}
   - {fileID: 1368135093}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1110418178}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1959240866
 GameObject:
@@ -33846,7 +33991,7 @@ GameObject:
   - component: {fileID: 2113285602}
   - component: {fileID: 2113285601}
   - component: {fileID: 2113285600}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: floor (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34174,10 +34319,5 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1133034362}
-  - {fileID: 285811924}
-  - {fileID: 1475217798}
-  - {fileID: 1953524433}
   - {fileID: 792478913}
-  - {fileID: 314452335}
-  - {fileID: 1168749993}
+  - {fileID: 1110418178}
