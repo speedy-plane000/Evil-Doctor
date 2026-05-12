@@ -1,0 +1,66 @@
+using UnityEngine;
+
+[RequireComponent(typeof(Collider))]
+public class CameraZone : MonoBehaviour
+{
+    public Color zoneColor = Color.red;
+    public float emissionIntensity = 4f;
+    private Collider zoneCollider;
+    private Renderer zoneRenderer;
+
+    void Reset()
+    {
+        Collider colliderInEditor = GetComponent<Collider>();
+        if (colliderInEditor != null)
+            colliderInEditor.isTrigger = true;
+    }
+
+    void Awake()
+    {
+        zoneCollider = GetComponent<Collider>();
+        zoneRenderer = GetComponent<Renderer>();
+        ApplyVisuals();
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        PlayerRespawn respawn = other.GetComponent<PlayerRespawn>() ?? other.GetComponentInParent<PlayerRespawn>();
+        if (respawn == null)
+            return;
+
+        respawn.RespawnAtCheckpoint();
+    }
+
+    public void SetZoneActive(bool isActive)
+    {
+        if (zoneCollider == null)
+            zoneCollider = GetComponent<Collider>();
+        if (zoneRenderer == null)
+            zoneRenderer = GetComponent<Renderer>();
+
+        if (zoneCollider != null)
+            zoneCollider.enabled = isActive;
+        if (zoneRenderer != null)
+            zoneRenderer.enabled = isActive;
+    }
+
+    void ApplyVisuals()
+    {
+        Renderer renderer = GetComponent<Renderer>();
+        if (zoneRenderer == null)
+            return;
+
+        Material materialInstance = zoneRenderer.material;
+
+        if (materialInstance.HasProperty("_BaseColor"))
+            materialInstance.SetColor("_BaseColor", zoneColor);
+        if (materialInstance.HasProperty("_Color"))
+            materialInstance.SetColor("_Color", zoneColor);
+
+        if (materialInstance.HasProperty("_EmissionColor"))
+        {
+            materialInstance.EnableKeyword("_EMISSION");
+            materialInstance.SetColor("_EmissionColor", zoneColor * emissionIntensity);
+        }
+    }
+}
