@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Ground Check")]
     public Transform groundCheck;
-    public float groundDistance = 0.4f;
+    public float groundDistance = 0.7f;
     public LayerMask groundMask;
 
     [Header("Footstep Sounds")]
@@ -26,7 +26,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Head Bobbing")]
     public float bobFrequency = 5f;
     public float bobAmount = 0.05f;
-    private float defaultYPos;  
+    private float defaultYPos;
     private float timer = 0f;
 
     private CharacterController controller;
@@ -120,7 +120,8 @@ public class PlayerMovement : MonoBehaviour
     {
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 1.5f))
+
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 15f))
         {
             switch (hit.collider.tag)
             {
@@ -178,4 +179,6 @@ public class PlayerMovement : MonoBehaviour
     {
         velocity = Vector3.zero;
     }
+
+  
 }
