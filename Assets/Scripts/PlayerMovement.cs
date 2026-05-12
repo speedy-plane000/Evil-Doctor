@@ -45,6 +45,8 @@ public class PlayerMovement : MonoBehaviour
         defaultYPos = mainCamera.transform.localPosition.y;
     }
 
+    public bool isMainPlayer = true;
+
     void Update()
     {
         CheckGround();
