@@ -5,16 +5,27 @@ public class CheckpointZone : MonoBehaviour
 {
     void Reset()
     {
-        Collider zoneCollider = GetComponent<Collider>();
-        zoneCollider.isTrigger = true;
+        EnsureTriggerCollider();
+    }
+
+    void Awake()
+    {
+        EnsureTriggerCollider();
     }
 
     void OnTriggerEnter(Collider other)
     {
-        PlayerRespawn respawn = other.GetComponent<PlayerRespawn>() ?? other.GetComponentInParent<PlayerRespawn>();
+        PlayerRespawn respawn = PlayerRespawnResolver.ResolveFromCollider(other);
         if (respawn == null)
             return;
 
         respawn.SetCheckpoint(transform);
+    }
+
+    void EnsureTriggerCollider()
+    {
+        Collider zoneCollider = GetComponent<Collider>();
+        if (zoneCollider != null)
+            zoneCollider.isTrigger = true;
     }
 }

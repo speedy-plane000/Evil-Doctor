@@ -10,13 +10,12 @@ public class CameraZone : MonoBehaviour
 
     void Reset()
     {
-        Collider colliderInEditor = GetComponent<Collider>();
-        if (colliderInEditor != null)
-            colliderInEditor.isTrigger = true;
+        EnsureTriggerCollider();
     }
 
     void Awake()
     {
+        EnsureTriggerCollider();
         zoneCollider = GetComponent<Collider>();
         zoneRenderer = GetComponent<Renderer>();
         ApplyVisuals();
@@ -24,7 +23,7 @@ public class CameraZone : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        PlayerRespawn respawn = other.GetComponent<PlayerRespawn>() ?? other.GetComponentInParent<PlayerRespawn>();
+        PlayerRespawn respawn = PlayerRespawnResolver.ResolveFromCollider(other);
         if (respawn == null)
             return;
 
@@ -62,5 +61,12 @@ public class CameraZone : MonoBehaviour
             materialInstance.EnableKeyword("_EMISSION");
             materialInstance.SetColor("_EmissionColor", zoneColor * emissionIntensity);
         }
+    }
+
+    void EnsureTriggerCollider()
+    {
+        Collider colliderInEditor = GetComponent<Collider>();
+        if (colliderInEditor != null)
+            colliderInEditor.isTrigger = true;
     }
 }
