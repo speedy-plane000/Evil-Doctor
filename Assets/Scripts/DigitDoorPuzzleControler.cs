@@ -16,7 +16,7 @@ public class DigitDoorPuzzleController : MonoBehaviour
     public string modelRelativePath = "digit_model.bin";
     [Range(0, 9)] public int correctDigit = 4;
 
-    private LinearSoftmaxDigitModel model;
+    private IDigitModel model;
     private bool modelLoaded;
 
     void Start()
@@ -116,7 +116,7 @@ public class DigitDoorPuzzleController : MonoBehaviour
         }
 
         int expectedInput = drawingPanel != null ? drawingPanel.PixelCount : FallbackInputSize;
-        if (!LinearSoftmaxDigitModel.TryCreate(bytes, expectedInput, out model, out string error))
+        if (!DigitModelFactory.TryCreate(bytes, expectedInput, out model, out string error))
         {
             Debug.LogWarning($"DigitDoorPuzzleController: failed to load model: {error}");
             return;
@@ -126,7 +126,113 @@ public class DigitDoorPuzzleController : MonoBehaviour
         Debug.Log($"DigitDoorPuzzleController: model loaded from '{path}'.");
     }
 
-    class LinearSoftmaxDigitModel
+    interface IDigitModel
+    {
+        int InputSize { get; }
+        int Predict(float[] input);
+    }
+
+    static class DigitModelFactory
+    {
+        const int KotlinModelVersion = 1;
+        const int KotlinOutputSize = 10;
+
+        public static bool TryCreate(byte[] modelBytes, int expectedInputSize, out IDigitModel model, out string error)
+        {
+            model = null;
+            error = null;
+
+            if (TryCreateKotlinTwoLayer(modelBytes, expectedInputSize, out model))
+                return true;
+            if (LinearSoftmaxDigitModel.TryCreate(modelBytes, expectedInputSize, out LinearSoftmaxDigitModel linearModel, out error))
+            {
+                model = linearModel;
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(error))
+                error = "Unsupported model format.";
+            return false;
+        }
+
+        static bool TryCreateKotlinTwoLayer(byte[] modelBytes, int expectedInputSize, out IDigitModel model)
+        {
+            model = null;
+            if (modelBytes == null || modelBytes.Length < 8) return false;
+            if (!TryReadInt32BigEndian(modelBytes, 0, out int version)) return false;
+            if (version != KotlinModelVersion) return false;
+            if (((modelBytes.Length - 4) % 4) != 0) return false;
+
+            int parameterCount = (modelBytes.Length - 4) / 4;
+            int hiddenNumerator = parameterCount - KotlinOutputSize;
+            int hiddenDenominator = expectedInputSize + KotlinOutputSize + 1;
+            if (hiddenDenominator <= 0 || hiddenNumerator <= 0 || (hiddenNumerator % hiddenDenominator) != 0)
+                return false;
+
+            int hiddenSize = hiddenNumerator / hiddenDenominator;
+            if (hiddenSize <= 0) return false;
+
+            int dense1WeightCount = expectedInputSize * hiddenSize;
+            int dense1BiasCount = hiddenSize;
+            int dense2WeightCount = hiddenSize * KotlinOutputSize;
+            int dense2BiasCount = KotlinOutputSize;
+            int expectedParameterCount = dense1WeightCount + dense1BiasCount + dense2WeightCount + dense2BiasCount;
+            if (parameterCount != expectedParameterCount) return false;
+
+            int byteOffset = 4;
+            if (!TryReadFloatArrayBigEndian(modelBytes, ref byteOffset, dense1WeightCount, out float[] dense1Weights)) return false;
+            if (!TryReadFloatArrayBigEndian(modelBytes, ref byteOffset, dense1BiasCount, out float[] dense1Bias)) return false;
+            if (!TryReadFloatArrayBigEndian(modelBytes, ref byteOffset, dense2WeightCount, out float[] dense2Weights)) return false;
+            if (!TryReadFloatArrayBigEndian(modelBytes, ref byteOffset, dense2BiasCount, out float[] dense2Bias)) return false;
+
+            model = new KotlinTwoLayerDigitModel(expectedInputSize, hiddenSize, KotlinOutputSize, dense1Weights, dense1Bias, dense2Weights, dense2Bias);
+            return true;
+        }
+
+        static bool TryReadInt32BigEndian(byte[] bytes, int offset, out int value)
+        {
+            value = 0;
+            if (bytes == null || offset < 0 || bytes.Length < offset + 4) return false;
+            value = (int)(((uint)bytes[offset] << 24) | ((uint)bytes[offset + 1] << 16) | ((uint)bytes[offset + 2] << 8) | bytes[offset + 3]);
+            return true;
+        }
+
+        static bool TryReadFloatArrayBigEndian(byte[] bytes, ref int offset, int count, out float[] values)
+        {
+            values = null;
+            if (count < 0 || bytes == null) return false;
+
+            int requiredBytes = count * 4;
+            if (offset < 0 || bytes.Length < offset + requiredBytes) return false;
+
+            values = new float[count];
+            if (BitConverter.IsLittleEndian)
+            {
+                byte[] tmp = new byte[4];
+                for (int i = 0; i < count; i++)
+                {
+                    tmp[0] = bytes[offset + 3];
+                    tmp[1] = bytes[offset + 2];
+                    tmp[2] = bytes[offset + 1];
+                    tmp[3] = bytes[offset];
+                    values[i] = BitConverter.ToSingle(tmp, 0);
+                    offset += 4;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    values[i] = BitConverter.ToSingle(bytes, offset);
+                    offset += 4;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    class LinearSoftmaxDigitModel : IDigitModel
     {
         public int InputSize { get; }
         public int OutputSize { get; }
@@ -229,6 +335,76 @@ public class DigitDoorPuzzleController : MonoBehaviour
 
             model = new LinearSoftmaxDigitModel(expectedInputSize, DigitClassCount, weights, bias);
             return true;
+        }
+    }
+
+    class KotlinTwoLayerDigitModel : IDigitModel
+    {
+        public int InputSize { get; }
+        public int HiddenSize { get; }
+        public int OutputSize { get; }
+
+        readonly float[] dense1Weights;
+        readonly float[] dense1Bias;
+        readonly float[] dense2Weights;
+        readonly float[] dense2Bias;
+        readonly float[] hiddenBuffer;
+
+        public KotlinTwoLayerDigitModel(
+            int inputSize,
+            int hiddenSize,
+            int outputSize,
+            float[] dense1Weights,
+            float[] dense1Bias,
+            float[] dense2Weights,
+            float[] dense2Bias)
+        {
+            InputSize = inputSize;
+            HiddenSize = hiddenSize;
+            OutputSize = outputSize;
+            this.dense1Weights = dense1Weights ?? throw new ArgumentNullException(nameof(dense1Weights));
+            this.dense1Bias = dense1Bias ?? throw new ArgumentNullException(nameof(dense1Bias));
+            this.dense2Weights = dense2Weights ?? throw new ArgumentNullException(nameof(dense2Weights));
+            this.dense2Bias = dense2Bias ?? throw new ArgumentNullException(nameof(dense2Bias));
+            hiddenBuffer = new float[hiddenSize];
+        }
+
+        public int Predict(float[] input)
+        {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            if (input.Length != InputSize) throw new ArgumentException("Unexpected input size.");
+
+            for (int j = 0; j < HiddenSize; j++)
+            {
+                float sum = dense1Bias[j];
+                int wIdx = j;
+                for (int i = 0; i < InputSize; i++)
+                {
+                    sum += input[i] * dense1Weights[wIdx];
+                    wIdx += HiddenSize;
+                }
+                hiddenBuffer[j] = sum > 0f ? sum : 0f;
+            }
+
+            int bestClass = 0;
+            float bestLogit = float.NegativeInfinity;
+            for (int j = 0; j < OutputSize; j++)
+            {
+                float sum = dense2Bias[j];
+                int wIdx = j;
+                for (int i = 0; i < HiddenSize; i++)
+                {
+                    sum += hiddenBuffer[i] * dense2Weights[wIdx];
+                    wIdx += OutputSize;
+                }
+                if (sum > bestLogit)
+                {
+                    bestLogit = sum;
+                    bestClass = j;
+                }
+            }
+
+            return bestClass;
         }
     }
 }

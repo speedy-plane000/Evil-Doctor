@@ -181,6 +181,4 @@ public class PlayerMovement : MonoBehaviour
     {
         velocity = Vector3.zero;
     }
-
-  
 }

@@ -62,7 +62,6 @@ Assets/Scripts/
  CheckpointZone.cs
  DigitDoorPuzzleControler.cs
  DigitDrawingPanel.cs
- DigitPuzzleBootstrap.cs
  DigitPuzzleButton.cs
  FloorManager.cs
  MouseCheck.cs

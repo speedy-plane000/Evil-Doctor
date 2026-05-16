@@ -91,6 +91,11 @@ public class DigitDrawingPanel : MonoBehaviour
     public float[] GetNormalizedPixelsTopLeft()
     {
         if (pixels == null) return null;
+
+        float backgroundIntensity = backgroundColor.r / 255f;
+        float drawIntensity = drawColor.r / 255f;
+        bool useContrastMapping = !Mathf.Approximately(backgroundIntensity, drawIntensity);
+
         float[] result = new float[pixels.Length];
         for (int y = 0; y < textureHeight; y++)
         {
@@ -99,7 +104,10 @@ public class DigitDrawingPanel : MonoBehaviour
             {
                 int srcIndex = sourceY * textureWidth + x;
                 int dstIndex = y * textureWidth + x;
-                result[dstIndex] = pixels[srcIndex].r / 255f;
+                float pixelIntensity = pixels[srcIndex].r / 255f;
+                result[dstIndex] = useContrastMapping
+                    ? Mathf.Clamp01((pixelIntensity - backgroundIntensity) / (drawIntensity - backgroundIntensity))
+                    : pixelIntensity;
             }
         }
         return result;
