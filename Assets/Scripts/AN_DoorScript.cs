@@ -3,11 +3,12 @@ using UnityEngine;
 public class AN_DoorScript : MonoBehaviour
 {
     [Header("Для Лазеров")]
-    public bool DestroyOnOpen = true; // Если это лазер, он просто исчезнет
+    [Tooltip("Если true, ворота станут невидимыми и неосязаемыми (пропадут)")]
+    public bool DestroyOnOpen = true;
 
     [Header("Состояние")]
     public bool isOpened = false;
-    public bool Remote = true; // Управление только через рычаг
+    public bool Remote = true;
 
     public void Action()
     {
@@ -17,15 +18,26 @@ public class AN_DoorScript : MonoBehaviour
 
         if (DestroyOnOpen)
         {
-            // Лазеры выключаются
-            gameObject.SetActive(false);
+            
+            MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>();
+            foreach (MeshRenderer rend in renderers)
+            {
+                rend.enabled = false;
+            }
+
+           
+            Collider[] colliders = GetComponentsInChildren<Collider>();
+            foreach (Collider col in colliders)
+            {
+                col.enabled = false;
+            }
         }
         else
         {
-            // Если это рампа (ворота), просто повернем её один раз
+            
             transform.Rotate(-90, 0, 0);
         }
 
-        Debug.Log(gameObject.name + " открыт!");
+        Debug.Log(gameObject.name + " открыт и скрыт из видимости!");
     }
 }
