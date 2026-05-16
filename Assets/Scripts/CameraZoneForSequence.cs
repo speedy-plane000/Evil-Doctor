@@ -17,12 +17,13 @@ public class CameraZoneForkSequence : MonoBehaviour
     public bool startFromFirstStep = true;
 
     private Coroutine sequenceCoroutine;
+    private bool isDisabledByRemote;
 
     void OnEnable()
     {
         DisableAllZones();
 
-        if (steps == null || steps.Count == 0)
+        if (isDisabledByRemote || steps == null || steps.Count == 0)
             return;
 
         sequenceCoroutine = StartCoroutine(SequenceLoop());
@@ -31,9 +32,35 @@ public class CameraZoneForkSequence : MonoBehaviour
     void OnDisable()
     {
         if (sequenceCoroutine != null)
+        {
             StopCoroutine(sequenceCoroutine);
+            sequenceCoroutine = null;
+        }
 
         DisableAllZones();
+    }
+
+    public void DisableSequenceByRemote()
+    {
+        isDisabledByRemote = true;
+
+        if (sequenceCoroutine != null)
+        {
+            StopCoroutine(sequenceCoroutine);
+            sequenceCoroutine = null;
+        }
+
+        if (steps == null)
+            return;
+
+        for (int i = 0; i < steps.Count; i++)
+        {
+            ZoneStep step = steps[i];
+            if (step == null || step.zone == null)
+                continue;
+
+            step.zone.DisableByRemote();
+        }
     }
 
     IEnumerator SequenceLoop()

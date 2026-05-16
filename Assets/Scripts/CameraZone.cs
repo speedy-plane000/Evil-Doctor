@@ -7,6 +7,9 @@ public class CameraZone : MonoBehaviour
     public float emissionIntensity = 4f;
     private Collider zoneCollider;
     private Renderer zoneRenderer;
+    private bool isPermanentlyDisabledByRemote;
+
+    public bool IsPermanentlyDisabledByRemote => isPermanentlyDisabledByRemote;
 
     void Reset()
     {
@@ -23,6 +26,9 @@ public class CameraZone : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        if (isPermanentlyDisabledByRemote)
+            return;
+
         PlayerRespawn respawn = PlayerRespawnResolver.ResolveFromCollider(other);
         if (respawn == null)
             return;
@@ -37,15 +43,24 @@ public class CameraZone : MonoBehaviour
         if (zoneRenderer == null)
             zoneRenderer = GetComponent<Renderer>();
 
+        bool effectiveActive = isActive && !isPermanentlyDisabledByRemote;
+
         if (zoneCollider != null)
-            zoneCollider.enabled = isActive;
+            zoneCollider.enabled = effectiveActive;
         if (zoneRenderer != null)
-            zoneRenderer.enabled = isActive;
+            zoneRenderer.enabled = effectiveActive;
+    }
+
+    public void DisableByRemote()
+    {
+        isPermanentlyDisabledByRemote = true;
+        SetZoneActive(false);
     }
 
     void ApplyVisuals()
     {
-        Renderer renderer = GetComponent<Renderer>();
+        if (zoneRenderer == null)
+            zoneRenderer = GetComponent<Renderer>();
         if (zoneRenderer == null)
             return;
 
