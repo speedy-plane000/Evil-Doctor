@@ -8,6 +8,9 @@ public class PlayerRespawn : MonoBehaviour
     private Vector3 checkpointPosition;
     private Quaternion checkpointRotation;
     private bool hasCheckpoint;
+    private float cameraCheckpointProtectionUntil;
+
+    public bool IsCameraCheckpointProtectionActive => Time.time < cameraCheckpointProtectionUntil;
 
     void Awake()
     {
@@ -46,5 +49,15 @@ public class PlayerRespawn : MonoBehaviour
 
         if (controller != null)
             controller.enabled = true;
+    }
+
+    public void ActivateCameraCheckpointProtection(float durationSeconds)
+    {
+        if (durationSeconds <= 0f)
+            return;
+
+        float protectionUntil = Time.time + durationSeconds;
+        if (protectionUntil > cameraCheckpointProtectionUntil)
+            cameraCheckpointProtectionUntil = protectionUntil;
     }
 }

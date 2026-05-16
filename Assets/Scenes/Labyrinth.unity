@@ -20105,23 +20105,35 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 1953524433}
     m_Modifications:
     - target: {fileID: 100000, guid: da8a393ba24fc6f49842d87b0937b84d, type: 3}
       propertyPath: m_Name
       value: bottle_blue
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: da8a393ba24fc6f49842d87b0937b84d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.35714284
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: da8a393ba24fc6f49842d87b0937b84d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.35714287
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: da8a393ba24fc6f49842d87b0937b84d, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.35714287
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: da8a393ba24fc6f49842d87b0937b84d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.66
+      value: -1.7662107
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: da8a393ba24fc6f49842d87b0937b84d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 8.687
+      value: 2.06623
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: da8a393ba24fc6f49842d87b0937b84d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 8.62
+      value: 0.49107122
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: da8a393ba24fc6f49842d87b0937b84d, type: 3}
       propertyPath: m_LocalRotation.w
@@ -27835,6 +27847,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1492587093}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &1496990152 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400000, guid: da8a393ba24fc6f49842d87b0937b84d, type: 3}
+  m_PrefabInstance: {fileID: 1124204171}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1500990398
 GameObject:
   m_ObjectHideFlags: 0
@@ -37110,6 +37127,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1496990152}
   - {fileID: 1161016916}
   - {fileID: 1043426515}
   - {fileID: 1576593001}
@@ -41648,4 +41666,3 @@ SceneRoots:
   - {fileID: 1884046937}
   - {fileID: 1981833316}
   - {fileID: 852158427}
-  - {fileID: 1124204171}

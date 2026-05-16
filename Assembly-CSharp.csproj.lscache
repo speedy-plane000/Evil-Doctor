@@ -56,6 +56,7 @@ Assets/AssetStore/Activation Station/Scripts/
 Assets/Scripts/
  AN_Button.cs
  AN_DoorScript.cs
+ BottleBlueCheckpointShield.cs
  CameraZone.cs
  CameraZoneBlink.cs
  CameraZoneForSequence.cs

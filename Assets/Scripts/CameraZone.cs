@@ -32,6 +32,8 @@ public class CameraZone : MonoBehaviour
         PlayerRespawn respawn = PlayerRespawnResolver.ResolveFromCollider(other);
         if (respawn == null)
             return;
+        if (respawn.IsCameraCheckpointProtectionActive)
+            return;
 
         respawn.RespawnAtCheckpoint();
     }
