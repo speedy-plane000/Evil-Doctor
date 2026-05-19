@@ -11,6 +11,8 @@ public class AN_Button : MonoBehaviour
     public bool isOpened = false;
     public float interactionDistance = 3f;
 
+    public bool WasAlreadyPressed => alreadyPressed;
+
     private Animator anim;
     private bool alreadyPressed = false;
 
