@@ -84,6 +84,8 @@ public class RemotePathfinderHelper : MonoBehaviour
         TryLoadGrid();
     }
 
+    public bool IsPickedUp => isPickedUp;
+    
     void Update()
     {
         if (!TryGetPlayer(out PlayerMovement player))
@@ -118,7 +120,8 @@ public class RemotePathfinderHelper : MonoBehaviour
         {
             statusMessageStyle = new GUIStyle(GUI.skin.label);
             statusMessageStyle.alignment = TextAnchor.MiddleCenter;
-            statusMessageStyle.fontSize = 24;
+            statusMessageStyle.fontSize = 32;
+            statusMessageStyle.fontStyle = FontStyle.Bold;
             statusMessageStyle.normal.textColor = Color.white;
         }
 
@@ -823,7 +826,7 @@ public class RemotePathfinderHelper : MonoBehaviour
         {
             leverMarkerStyle = new GUIStyle(GUI.skin.label);
             leverMarkerStyle.alignment = TextAnchor.MiddleCenter;
-            leverMarkerStyle.fontSize = 26;
+            leverMarkerStyle.fontSize = 34;
             leverMarkerStyle.fontStyle = FontStyle.Bold;
             leverMarkerStyle.normal.textColor = Color.yellow;
         }

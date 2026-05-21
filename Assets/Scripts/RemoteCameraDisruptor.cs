@@ -25,6 +25,8 @@ public class RemoteCameraDisruptor : MonoBehaviour
         cachedPlayer = ResolvePlayer();
     }
 
+    public bool IsPickedUp => isPickedUp;
+    public bool IsUsed => isUsed;
     void Update()
     {
         if (!TryGetPlayer(out PlayerMovement player))

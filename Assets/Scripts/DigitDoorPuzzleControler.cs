@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -47,6 +48,9 @@ public class DigitDoorPuzzleController : MonoBehaviour
             Debug.LogWarning("DigitDoorPuzzleController: target door is not assigned.");
             return;
         }
+        if (!modelLoaded || model == null)
+            LoadModel();
+
         if (!modelLoaded || model == null)
         {
             Debug.LogWarning("DigitDoorPuzzleController: model is not loaded, recognition is unavailable.");
@@ -97,10 +101,9 @@ public class DigitDoorPuzzleController : MonoBehaviour
         model = null;
         modelLoaded = false;
 
-        string path = Path.Combine(Application.streamingAssetsPath, modelRelativePath);
-        if (!File.Exists(path))
+        if (!TryResolveModelPath(out string path, out string details))
         {
-            Debug.LogWarning($"DigitDoorPuzzleController: model file not found at '{path}'.");
+            Debug.LogWarning($"DigitDoorPuzzleController: model file not found. {details}");
             return;
         }
 
@@ -124,6 +127,58 @@ public class DigitDoorPuzzleController : MonoBehaviour
 
         modelLoaded = true;
         Debug.Log($"DigitDoorPuzzleController: model loaded from '{path}'.");
+    }
+
+    bool TryResolveModelPath(out string resolvedPath, out string details)
+    {
+        resolvedPath = null;
+        details = null;
+
+        string relativePath = (modelRelativePath ?? string.Empty).Trim();
+        if (string.IsNullOrEmpty(relativePath))
+            relativePath = "digit_model.bin";
+
+        string normalizedRelativePath = relativePath.Replace('\\', '/');
+        if (normalizedRelativePath.StartsWith("StreamingAssets/", StringComparison.OrdinalIgnoreCase))
+            normalizedRelativePath = normalizedRelativePath.Substring("StreamingAssets/".Length);
+
+        List<string> candidates = new List<string>(5);
+        AddCandidate(candidates, Path.Combine(Application.streamingAssetsPath, normalizedRelativePath));
+        AddCandidate(candidates, Path.Combine(Application.dataPath, "StreamingAssets", normalizedRelativePath));
+
+        if (Path.IsPathRooted(relativePath))
+            AddCandidate(candidates, relativePath);
+
+        if (!normalizedRelativePath.Equals("digit_model.bin", StringComparison.OrdinalIgnoreCase))
+            AddCandidate(candidates, Path.Combine(Application.streamingAssetsPath, "digit_model.bin"));
+
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            if (File.Exists(candidates[i]))
+            {
+                resolvedPath = candidates[i];
+                details = $"Resolved path: '{resolvedPath}'.";
+                return true;
+            }
+        }
+
+        details = $"Checked paths: {string.Join(" | ", candidates)}";
+        return false;
+    }
+
+    static void AddCandidate(List<string> candidates, string candidate)
+    {
+        if (string.IsNullOrWhiteSpace(candidate))
+            return;
+
+        string fullPath = Path.GetFullPath(candidate);
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            if (string.Equals(candidates[i], fullPath, StringComparison.OrdinalIgnoreCase))
+                return;
+        }
+
+        candidates.Add(fullPath);
     }
 
     interface IDigitModel
