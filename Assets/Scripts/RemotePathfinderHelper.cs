@@ -1,15 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public class RemotePathfinderHelper : MonoBehaviour
 {
     const float PlayerLookupInterval = 1f;
-    const float AbilityCooldownSeconds = 30f;
+    const float AbilityCooldownSeconds = 2f;
     const float LeverHighlightSeconds = 5f;
     const float MessageVisibleSeconds = 5f;
     const float LeverCacheRefreshInterval = 2f;
+    const float LeverMarkerVerticalOffset = 1.2f;
+    const string LeverMarkerText = "★ СТОЛБ РЫЧАГА ★";
+    const float GridCellSizeWorldUnits = 2.75f;
+    const float GridXWorldOffset = 0.3f;
+    const float GridZWorldOffset = 7.25f;
     const int MazeOffset = 6;
     const int MazeScale = 2;
 
@@ -23,6 +29,9 @@ public class RemotePathfinderHelper : MonoBehaviour
 
     [Header("Maze Data")]
     public string gridResourceName = "AStarGrid";
+
+    [Header("Highlight Material")]
+    public Material highlightMaterial;
 
     PlayerMovement cachedPlayer;
     float nextPlayerLookupTime;
@@ -40,10 +49,20 @@ public class RemotePathfinderHelper : MonoBehaviour
     string statusMessage = string.Empty;
     float statusMessageUntilTime;
     GUIStyle statusMessageStyle;
+    GUIStyle leverMarkerStyle;
+    Vector3 highlightedLeverMarkerWorldPosition;
+    float highlightedLeverMarkerUntilTime;
 
     Coroutine leverHighlightCoroutine;
     AN_Button[] cachedButtons;
     float nextLeverCacheRefreshTime;
+
+    sealed class HighlightState
+    {
+        public Renderer renderer;
+        public Material[] originalMaterials;
+        public Material[] highlightMaterials;
+    }
 
     static readonly Vector2Int[] Directions =
     {
@@ -52,15 +71,6 @@ public class RemotePathfinderHelper : MonoBehaviour
         Vector2Int.left,
         Vector2Int.right
     };
-
-    sealed class RendererHighlightState
-    {
-        public Renderer renderer;
-        public MaterialPropertyBlock originalBlock;
-        public bool hasColor;
-        public bool hasBaseColor;
-        public bool hasEmission;
-    }
 
     void Awake()
     {
@@ -95,7 +105,10 @@ public class RemotePathfinderHelper : MonoBehaviour
     void OnGUI()
     {
         if (Time.time > statusMessageUntilTime || string.IsNullOrEmpty(statusMessage))
+        {
+            DrawLeverMarkerOnScreen();
             return;
+        }
 
         if (statusMessageStyle == null)
         {
@@ -107,6 +120,7 @@ public class RemotePathfinderHelper : MonoBehaviour
 
         Rect messageRect = new Rect(0f, Screen.height - 50f, Screen.width, 40f);
         GUI.Label(messageRect, statusMessage, statusMessageStyle);
+        DrawLeverMarkerOnScreen();
     }
 
     bool TryGetPlayer(out PlayerMovement player)
@@ -388,9 +402,9 @@ public class RemotePathfinderHelper : MonoBehaviour
 
     bool TryWorldToGridCell(Vector3 worldPosition, out Vector2Int cell)
     {
-        int x = Mathf.FloorToInt(worldPosition.x + MazeOffset) * MazeScale;
-        int y = Mathf.FloorToInt(-worldPosition.z + MazeOffset) * MazeScale;
-        cell = new Vector2Int(x, y);
+        int gridX = (Mathf.FloorToInt((worldPosition.x - GridXWorldOffset) / GridCellSizeWorldUnits) + MazeOffset) * MazeScale;
+        int gridZ = (-Mathf.FloorToInt((worldPosition.z - GridZWorldOffset) / GridCellSizeWorldUnits) + MazeOffset) * MazeScale - 2;
+        cell = new Vector2Int(gridX, gridZ);
 
         return IsInBounds(cell);
     }
@@ -405,7 +419,11 @@ public class RemotePathfinderHelper : MonoBehaviour
         if (!TryWorldToGridCell(player.transform.position, out Vector2Int rawCell))
             return false;
 
-        return TryFindNearestPassableCell(rawCell, out playerCell);
+        if (!TryFindNearestPassableCell(rawCell, out playerCell))
+            return false;
+
+        Debug.Log($"[RemotePathfinderHelper] JSON grid cell used for player: x={playerCell.x}, y={playerCell.y} (y->world z, raw: x={rawCell.x}, y={rawCell.y})");
+        return true;
     }
 
     bool TryFindNearestPassableCell(Vector2Int start, out Vector2Int passableCell)
@@ -555,8 +573,13 @@ public class RemotePathfinderHelper : MonoBehaviour
         if (leverObject == null)
             yield break;
 
-        Renderer[] renderers = leverObject.GetComponentsInChildren<Renderer>(true);
-        List<RendererHighlightState> states = new List<RendererHighlightState>();
+        if (!TryGetLeverSupportRenderers(leverObject, out Renderer[] renderers))
+            yield break;
+
+        highlightedLeverMarkerWorldPosition = GetRenderersCenter(renderers, leverObject.transform.position);
+        highlightedLeverMarkerUntilTime = Time.time + LeverHighlightSeconds;
+
+        List<HighlightState> states = new List<HighlightState>();
 
         for (int i = 0; i < renderers.Length; i++)
         {
@@ -564,58 +587,165 @@ public class RemotePathfinderHelper : MonoBehaviour
             if (renderer == null)
                 continue;
 
-            Material[] materials = renderer.sharedMaterials;
-            bool hasColor = false;
-            bool hasBaseColor = false;
-            bool hasEmission = false;
-
-            for (int j = 0; j < materials.Length; j++)
-            {
-                Material material = materials[j];
-                if (material == null)
-                    continue;
-
-                hasColor |= material.HasProperty("_Color");
-                hasBaseColor |= material.HasProperty("_BaseColor");
-                hasEmission |= material.HasProperty("_EmissionColor");
-            }
-
-            if (!hasColor && !hasBaseColor && !hasEmission)
+            if (renderer is ParticleSystemRenderer || renderer is TrailRenderer)
                 continue;
 
-            RendererHighlightState state = new RendererHighlightState();
-            state.renderer = renderer;
-            state.originalBlock = new MaterialPropertyBlock();
-            renderer.GetPropertyBlock(state.originalBlock);
-            state.hasColor = hasColor;
-            state.hasBaseColor = hasBaseColor;
-            state.hasEmission = hasEmission;
+            HighlightState state = new HighlightState
+            {
+                renderer = renderer,
+                originalMaterials = renderer.materials
+            };
+
+            if (highlightMaterial != null)
+            {
+                state.highlightMaterials = new Material[state.originalMaterials.Length];
+                for (int j = 0; j < state.highlightMaterials.Length; j++)
+                {
+                    state.highlightMaterials[j] = new Material(highlightMaterial);
+                    if (state.originalMaterials[j] != null && state.originalMaterials[j].HasProperty("_MainTex"))
+                    {
+                        Texture mainTex = state.originalMaterials[j].GetTexture("_MainTex");
+                        if (mainTex != null)
+                            state.highlightMaterials[j].SetTexture("_MainTex", mainTex);
+                    }
+                }
+                renderer.materials = state.highlightMaterials;
+            }
+            else
+            {
+                Shader glowShader = Shader.Find("Legacy Shaders/Self-Illumin/Diffuse");
+                state.highlightMaterials = new Material[state.originalMaterials.Length];
+                for (int j = 0; j < state.highlightMaterials.Length; j++)
+                {
+                    state.highlightMaterials[j] = new Material(glowShader);
+                    state.highlightMaterials[j].color = Color.yellow;
+                    if (state.originalMaterials[j] != null && state.originalMaterials[j].HasProperty("_MainTex"))
+                    {
+                        Texture mainTex = state.originalMaterials[j].GetTexture("_MainTex");
+                        if (mainTex != null)
+                        {
+                            state.highlightMaterials[j].SetTexture("_MainTex", mainTex);
+                        }
+                    }
+                }
+                renderer.materials = state.highlightMaterials;
+            }
+
             states.Add(state);
-
-            MaterialPropertyBlock highlightBlock = new MaterialPropertyBlock();
-            renderer.GetPropertyBlock(highlightBlock);
-            if (state.hasColor)
-                highlightBlock.SetColor("_Color", Color.yellow);
-            if (state.hasBaseColor)
-                highlightBlock.SetColor("_BaseColor", Color.yellow);
-            if (state.hasEmission)
-                highlightBlock.SetColor("_EmissionColor", Color.yellow * 2f);
-
-            renderer.SetPropertyBlock(highlightBlock);
         }
 
         yield return new WaitForSeconds(LeverHighlightSeconds);
 
         for (int i = 0; i < states.Count; i++)
         {
-            RendererHighlightState state = states[i];
+            HighlightState state = states[i];
             if (state.renderer == null)
                 continue;
 
-            state.renderer.SetPropertyBlock(state.originalBlock);
+            state.renderer.materials = state.originalMaterials;
+
+            for (int j = 0; j < state.highlightMaterials.Length; j++)
+            {
+                if (state.highlightMaterials[j] != null)
+                    Destroy(state.highlightMaterials[j]);
+            }
         }
 
         leverHighlightCoroutine = null;
+    }
+
+    bool TryGetLeverSupportRenderers(GameObject leverObject, out Renderer[] supportRenderers)
+    {
+        supportRenderers = Array.Empty<Renderer>();
+        Transform leverTransform = leverObject.transform;
+
+        for (Transform parent = leverTransform.parent; parent != null; parent = parent.parent)
+        {
+            Renderer[] parentRenderers = parent.GetComponentsInChildren<Renderer>(true);
+            if (parentRenderers == null || parentRenderers.Length == 0)
+                continue;
+
+            List<Renderer> filtered = new List<Renderer>();
+            for (int i = 0; i < parentRenderers.Length; i++)
+            {
+                Renderer renderer = parentRenderers[i];
+                if (renderer == null)
+                    continue;
+
+                if (renderer.transform == leverTransform || renderer.transform.IsChildOf(leverTransform))
+                    continue;
+
+                filtered.Add(renderer);
+            }
+
+            if (filtered.Count > 0)
+            {
+                supportRenderers = filtered.ToArray();
+                return true;
+            }
+        }
+
+        supportRenderers = leverObject.GetComponentsInChildren<Renderer>(true);
+        return supportRenderers != null && supportRenderers.Length > 0;
+    }
+
+    Vector3 GetRenderersCenter(Renderer[] renderers, Vector3 fallbackPosition)
+    {
+        if (renderers == null || renderers.Length == 0)
+            return fallbackPosition;
+
+        bool hasBounds = false;
+        Bounds combinedBounds = default;
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer renderer = renderers[i];
+            if (renderer == null)
+                continue;
+
+            if (!hasBounds)
+            {
+                combinedBounds = renderer.bounds;
+                hasBounds = true;
+            }
+            else
+            {
+                combinedBounds.Encapsulate(renderer.bounds);
+            }
+        }
+
+        return hasBounds ? combinedBounds.center : fallbackPosition;
+    }
+
+    void DrawLeverMarkerOnScreen()
+    {
+        if (Time.time > highlightedLeverMarkerUntilTime)
+            return;
+
+        Camera camera = Camera.main;
+        if (camera == null)
+            return;
+
+        if (leverMarkerStyle == null)
+        {
+            leverMarkerStyle = new GUIStyle(GUI.skin.label);
+            leverMarkerStyle.alignment = TextAnchor.MiddleCenter;
+            leverMarkerStyle.fontSize = 26;
+            leverMarkerStyle.fontStyle = FontStyle.Bold;
+            leverMarkerStyle.normal.textColor = Color.yellow;
+        }
+
+        Vector3 screenPoint = camera.WorldToScreenPoint(highlightedLeverMarkerWorldPosition + Vector3.up * LeverMarkerVerticalOffset);
+        if (screenPoint.z <= 0f)
+            return;
+
+        float markerWidth = 320f;
+        float markerHeight = 40f;
+        Rect markerRect = new Rect(
+            screenPoint.x - markerWidth * 0.5f,
+            Screen.height - screenPoint.y - markerHeight * 0.5f,
+            markerWidth,
+            markerHeight);
+        GUI.Label(markerRect, LeverMarkerText, leverMarkerStyle);
     }
 }
 
@@ -630,7 +760,7 @@ public static class RemotePathfinderHelperBootstrap
 
         RemoteCameraDisruptor disruptor = remoteObject.GetComponent<RemoteCameraDisruptor>();
         if (disruptor != null)
-            Object.Destroy(disruptor);
+            UnityEngine.Object.Destroy(disruptor);
 
         if (remoteObject.GetComponent<RemotePathfinderHelper>() == null)
             remoteObject.AddComponent<RemotePathfinderHelper>();
