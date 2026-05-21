@@ -17,7 +17,7 @@ public class KeypadTaskLogic : MonoBehaviour
     public Slider timerSlider;
 
     [Header("Настройки сложности")]
-    public float timeLimit = 5f; 
+    public float timeLimit = 6f; 
 
     private string requiredCode;
     private string currentInput = "";

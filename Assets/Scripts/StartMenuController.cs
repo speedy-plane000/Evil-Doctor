@@ -97,19 +97,19 @@ public class StartMenuController : MonoBehaviour
 
     void BuildMainPanel(Transform parent)
     {
-        Text title = CreateText("Title", parent, "Evil Doctor", 80, TextAnchor.MiddleCenter);
-        SetRect(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 180f), new Vector2(700f, 100f));
+        Text title = CreateText("Title", parent, "Evil Doctor", 100, TextAnchor.MiddleCenter);
+        SetRect(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 255f), new Vector2(1400f, 220f));
 
         Button startButton = CreateButton("StartButton", parent, "Начать");
-        SetRect(startButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 25f), new Vector2(340f, 70f));
+        SetRect(startButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 35f), new Vector2(460f, 100f));
         startButton.onClick.AddListener(StartGame);
 
         Button settingsButton = CreateButton("SettingsButton", parent, "Настройки");
-        SetRect(settingsButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -65f), new Vector2(340f, 70f));
+        SetRect(settingsButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -85f), new Vector2(460f, 100f));
         settingsButton.onClick.AddListener(OpenSettings);
 
         Button exitButton = CreateButton("ExitButton", parent, "Выход");
-        SetRect(exitButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -155f), new Vector2(340f, 70f));
+        SetRect(exitButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -205f), new Vector2(460f, 100f));
         exitButton.onClick.AddListener(QuitGame);
     }
 
@@ -131,7 +131,7 @@ public class StartMenuController : MonoBehaviour
         backRect.anchorMax = new Vector2(1f, 0f);
         backRect.pivot = new Vector2(1f, 0f);
         backRect.anchoredPosition = new Vector2(-30f, 30f);
-        backRect.sizeDelta = new Vector2(220f, 60f);
+        backRect.sizeDelta = new Vector2(280f, 80f);
         backButton.onClick.AddListener(CloseSettings);
     }
 
@@ -140,7 +140,7 @@ public class StartMenuController : MonoBehaviour
         GameObject container = new GameObject(label + "Container", typeof(RectTransform));
         container.transform.SetParent(parent, false);
         RectTransform containerRect = container.GetComponent<RectTransform>();
-        SetRect(containerRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, new Vector2(760f, 140f));
+        SetRect(containerRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, new Vector2(790f, 160f));
 
         Text labelText = CreateText(label + "Label", container.transform, label, 38, TextAnchor.MiddleLeft);
         SetRect(labelText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -30f), new Vector2(0f, 64f));
@@ -266,6 +266,8 @@ public class StartMenuController : MonoBehaviour
         text.alignment = alignment;
         text.color = Color.white;
         text.supportRichText = false;
+        text.horizontalOverflow = HorizontalWrapMode.Overflow;
+        text.verticalOverflow = VerticalWrapMode.Overflow;
         return text;
     }
 
@@ -282,7 +284,7 @@ public class StartMenuController : MonoBehaviour
         button.colors = colors;
         AddWhiteOutline(button.gameObject);
 
-        Text text = CreateText("Label", button.transform, label, 36, TextAnchor.MiddleCenter);
+        Text text = CreateText("Label", button.transform, label, 46, TextAnchor.MiddleCenter);
         StretchToFullScreen(text.rectTransform);
         return button;
     }

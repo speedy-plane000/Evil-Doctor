@@ -148,7 +148,7 @@ public class PauseMenuController : MonoBehaviour
             return;
 
         StringBuilder builder = new StringBuilder();
-        builder.AppendLine("Взаимодействие с предметами - E");
+        builder.AppendLine("E - Взаимодействие с предметами");
 
         if (remoteCameraDisruptor != null && remoteCameraDisruptor.IsPickedUp)
             builder.AppendLine("R - отключить ближайшую камеру");
@@ -213,7 +213,7 @@ public class PauseMenuController : MonoBehaviour
         GameObject container = new GameObject(label + "Container", typeof(RectTransform));
         container.transform.SetParent(parent, false);
         RectTransform containerRect = container.GetComponent<RectTransform>();
-        SetRect(containerRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, new Vector2(760f, 140f));
+        SetRect(containerRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, new Vector2(790f, 160f));
 
         Text labelText = CreateText(label + "Label", container.transform, label, 38, TextAnchor.MiddleLeft);
         SetRect(labelText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -30f), new Vector2(0f, 64f));
