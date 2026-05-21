@@ -7,10 +7,9 @@ using UnityEngine;
 public class RemotePathfinderHelper : MonoBehaviour
 {
     const float PlayerLookupInterval = 1f;
-    const float AbilityCooldownSeconds = 2f;
+    const float AbilityCooldownSeconds = 30f;
     const float LeverHighlightSeconds = 5f;
     const float MessageVisibleSeconds = 5f;
-    const float LeverCacheRefreshInterval = 2f;
     const float LeverMarkerVerticalOffset = 1.2f;
     const string LeverMarkerText = "★ СТОЛБ РЫЧАГА ★";
     const float GridCellSizeWorldUnits = 2.75f;
@@ -18,6 +17,8 @@ public class RemotePathfinderHelper : MonoBehaviour
     const float GridZWorldOffset = 7.25f;
     const int MazeOffset = 6;
     const int MazeScale = 2;
+    const int LeverCellSearchRadius = 2;
+    const float LeverParticipantsRefreshInterval = 2f;
 
     [Header("Interaction")]
     public float interactionDistance = 2.5f;
@@ -32,7 +33,7 @@ public class RemotePathfinderHelper : MonoBehaviour
 
     [Header("Highlight Material")]
     public Material highlightMaterial;
-
+    
     PlayerMovement cachedPlayer;
     float nextPlayerLookupTime;
     bool isPickedUp;
@@ -54,8 +55,10 @@ public class RemotePathfinderHelper : MonoBehaviour
     float highlightedLeverMarkerUntilTime;
 
     Coroutine leverHighlightCoroutine;
-    AN_Button[] cachedButtons;
-    float nextLeverCacheRefreshTime;
+    AN_Button[] cachedParticipantLevers;
+    float nextParticipantLeversRefreshTime;
+    readonly List<AN_Button> leverBuffer = new List<AN_Button>(8);
+    readonly HashSet<AN_Button> uniqueLeverBuffer = new HashSet<AN_Button>();
 
     sealed class HighlightState
     {
@@ -71,6 +74,7 @@ public class RemotePathfinderHelper : MonoBehaviour
         Vector2Int.left,
         Vector2Int.right
     };
+    static readonly AN_Button[] EmptyButtons = Array.Empty<AN_Button>();
 
     void Awake()
     {
@@ -218,28 +222,14 @@ public class RemotePathfinderHelper : MonoBehaviour
             return;
         }
 
-        AN_Button[] allButtons = GetButtons();
         AN_Button nearestLever = null;
         int nearestPathLength = int.MaxValue;
-
-        for (int i = 0; i < allButtons.Length; i++)
-        {
-            AN_Button button = allButtons[i];
-            if (button == null || !button.isLever || button.WasAlreadyPressed)
-                continue;
-
-            if (!TryWorldToGridCell(button.transform.position, out Vector2Int leverCell))
-                continue;
-
-            if (!TryFindPathLength(playerCell, leverCell, out int pathLength))
-                continue;
-
-            if (pathLength < nearestPathLength)
-            {
-                nearestPathLength = pathLength;
-                nearestLever = button;
-            }
-        }
+        AN_Button[] firstFloorLevers = GetLeversWithSearchParticipant();
+        EvaluateNearestLeverFromButtons(
+            firstFloorLevers,
+            playerCell,
+            ref nearestLever,
+            ref nearestPathLength);
 
         if (nearestLever == null)
         {
@@ -253,6 +243,35 @@ public class RemotePathfinderHelper : MonoBehaviour
             StopCoroutine(leverHighlightCoroutine);
 
         leverHighlightCoroutine = StartCoroutine(HighlightLever(nearestLever.gameObject));
+    }
+
+    void EvaluateNearestLeverFromButtons(
+        AN_Button[] buttons,
+        Vector2Int playerCell,
+        ref AN_Button nearestLever,
+        ref int nearestPathLength)
+    {
+        if (buttons == null || buttons.Length == 0)
+            return;
+
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            AN_Button button = buttons[i];
+            if (button == null || !button.isLever || button.WasAlreadyPressed)
+                continue;
+
+            if (!TryGetLeverGridCell(button, out Vector2Int leverCell))
+                continue;
+
+            if (!TryFindPathLength(playerCell, leverCell, out int pathLength))
+                continue;
+
+            if (pathLength < nearestPathLength)
+            {
+                nearestPathLength = pathLength;
+                nearestLever = button;
+            }
+        }
     }
 
     bool TryConsumeAbilityUse()
@@ -557,15 +576,90 @@ public class RemotePathfinderHelper : MonoBehaviour
         return grid[cell.y][cell.x] != 0;
     }
 
-    AN_Button[] GetButtons()
+    bool IsLeverCell(Vector2Int cell)
     {
-        if (cachedButtons == null || Time.time >= nextLeverCacheRefreshTime)
+        return IsInBounds(cell) && grid[cell.y][cell.x] == 2;
+    }
+
+    bool TryGetLeverGridCell(AN_Button button, out Vector2Int leverCell)
+    {
+        leverCell = default;
+
+        if (button == null || !TryWorldToGridCell(button.transform.position, out Vector2Int rawCell))
+            return false;
+
+        if (IsLeverCell(rawCell))
         {
-            cachedButtons = FindObjectsByType<AN_Button>(FindObjectsSortMode.None);
-            nextLeverCacheRefreshTime = Time.time + LeverCacheRefreshInterval;
+            leverCell = rawCell;
+            return true;
         }
 
-        return cachedButtons;
+        return TryFindNearestLeverCell(rawCell, LeverCellSearchRadius, out leverCell);
+    }
+
+    bool TryFindNearestLeverCell(Vector2Int startCell, int maxRadius, out Vector2Int leverCell)
+    {
+        leverCell = default;
+
+        if (!IsInBounds(startCell) || maxRadius <= 0)
+            return false;
+
+        int bestDistance = int.MaxValue;
+        bool found = false;
+
+        for (int dy = -maxRadius; dy <= maxRadius; dy++)
+        {
+            for (int dx = -maxRadius; dx <= maxRadius; dx++)
+            {
+                Vector2Int candidate = new Vector2Int(startCell.x + dx, startCell.y + dy);
+                if (!IsLeverCell(candidate))
+                    continue;
+
+                int distance = Mathf.Abs(dx) + Mathf.Abs(dy);
+                if (distance >= bestDistance)
+                    continue;
+
+                bestDistance = distance;
+                leverCell = candidate;
+                found = true;
+            }
+        }
+
+        return found;
+    }
+
+    AN_Button[] GetLeversWithSearchParticipant()
+    {
+        if (cachedParticipantLevers != null && Time.time < nextParticipantLeversRefreshTime)
+            return cachedParticipantLevers;
+
+        RemoteLeverSearchParticipant[] participants = FindObjectsByType<RemoteLeverSearchParticipant>(FindObjectsSortMode.None);
+        if (participants == null || participants.Length == 0)
+        {
+            cachedParticipantLevers = EmptyButtons;
+            nextParticipantLeversRefreshTime = Time.time + LeverParticipantsRefreshInterval;
+            return cachedParticipantLevers;
+        }
+
+        leverBuffer.Clear();
+        uniqueLeverBuffer.Clear();
+
+        for (int i = 0; i < participants.Length; i++)
+        {
+            RemoteLeverSearchParticipant participant = participants[i];
+            if (participant == null)
+                continue;
+
+            if (!participant.TryGetLeverButton(out AN_Button button))
+                continue;
+
+            if (uniqueLeverBuffer.Add(button))
+                leverBuffer.Add(button);
+        }
+
+        cachedParticipantLevers = leverBuffer.Count > 0 ? leverBuffer.ToArray() : EmptyButtons;
+        nextParticipantLeversRefreshTime = Time.time + LeverParticipantsRefreshInterval;
+        return cachedParticipantLevers;
     }
 
     IEnumerator HighlightLever(GameObject leverObject)
