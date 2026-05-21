@@ -1,7 +1,18 @@
 using UnityEngine;
+using UnityEngine.UI;
+
+public enum TaskUiLogic
+{
+    Auto,
+    Keypad,
+    TerminalColors,
+    WireTask
+}
 
 public class TaskStation : MonoBehaviour
 {
+    const string ColorTaskNamePattern = "color";
+
     [Header("Связь с дверью")]
     public AN_DoorScript targetDoor;
 
@@ -17,6 +28,8 @@ public class TaskStation : MonoBehaviour
 
     [Header("UI Задания")]
     public GameObject taskUIPanel;
+    [Tooltip("Auto: по имени объекта (если содержит 'color' — цветовая задача). Лучше явно выбрать режим для новых станций.")]
+    public TaskUiLogic uiLogic = TaskUiLogic.Auto;
     public float interactionDistance = 3f;
 
     private bool isTaskActive = false;
@@ -54,6 +67,7 @@ public class TaskStation : MonoBehaviour
     void StartTask(PlayerMovement player)
     {
         isTaskActive = true;
+        PrepareTaskUi();
         taskUIPanel.SetActive(true);
 
         player.enabled = false;
@@ -62,6 +76,100 @@ public class TaskStation : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+    }
+
+    void PrepareTaskUi()
+    {
+    if (taskUIPanel == null)
+        return;
+
+    KeypadTaskLogic keypadLogic = taskUIPanel.GetComponentInChildren<KeypadTaskLogic>(true);
+    TerminalColorsTaskLogic colorsLogic = taskUIPanel.GetComponentInChildren<TerminalColorsTaskLogic>(true);
+    WireTaskLogic wireLogic = taskUIPanel.GetComponentInChildren<WireTaskLogic>(true);
+    
+    // Отключаем все логики
+    if (keypadLogic != null) keypadLogic.enabled = false;
+    if (colorsLogic != null) colorsLogic.enabled = false;
+    if (wireLogic != null) wireLogic.enabled = false;
+
+    // Включаем нужную логику
+    switch (uiLogic)
+    {
+        case TaskUiLogic.WireTask:
+            if (wireLogic != null)
+            {
+                wireLogic.myStation = this;
+                wireLogic.enabled = true;
+            }
+            break;
+            
+        case TaskUiLogic.Keypad:
+            if (keypadLogic != null)
+            {
+                keypadLogic.myStation = this;
+                keypadLogic.enabled = true;
+            }
+            break;
+            
+        case TaskUiLogic.TerminalColors:
+            if (colorsLogic != null)
+            {
+                colorsLogic.myStation = this;
+                colorsLogic.enabled = true;
+            }
+            // Копируем UI элементы если нужно
+            if (keypadLogic != null && colorsLogic != null)
+                CopySharedTaskUi(keypadLogic, colorsLogic);
+            break;
+            
+        case TaskUiLogic.Auto:
+        default:
+            // Автоопределение по имени (старая логика)
+            bool useColorsTask = UsesColorTask();
+            if (useColorsTask)
+            {
+                if (colorsLogic != null) colorsLogic.enabled = true;
+                if (keypadLogic != null) keypadLogic.enabled = false;
+            }
+            else
+            {
+                if (keypadLogic != null) keypadLogic.enabled = true;
+                if (colorsLogic != null) colorsLogic.enabled = false;
+            }
+            break;
+        }
+    }
+
+    bool UsesColorTask()
+    {
+        if (uiLogic == TaskUiLogic.TerminalColors)
+            return true;
+
+        if (uiLogic == TaskUiLogic.Keypad)
+            return false;
+
+        string lowerName = gameObject.name.ToLowerInvariant();
+        return lowerName.Contains(ColorTaskNamePattern);
+    }
+
+    void CopySharedTaskUi(KeypadTaskLogic source, TerminalColorsTaskLogic target)
+    {
+        if (target == null || source == null)
+            return;
+
+        target.targetCodeText = source.targetCodeText;
+        target.inputCodeText = source.inputCodeText;
+        target.timerText = source.timerText;
+        target.timerSlider = source.timerSlider;
+        target.timeLimit = source.timeLimit;
+        target.buttonsRoot = source.buttonsRoot;
+
+        if (target.buttonsRoot == null)
+        {
+            GridLayoutGroup grid = source.GetComponentInChildren<GridLayoutGroup>(true);
+            if (grid != null)
+                target.buttonsRoot = grid.transform;
+        }
     }
 
     // Вызывается при правильном решении любой мини-игры
