@@ -112,14 +112,15 @@ public class TaskStation : MonoBehaviour
             break;
             
         case TaskUiLogic.TerminalColors:
+            if (colorsLogic == null)
+                colorsLogic = EnsureTerminalColorsLogic(keypadLogic);
+
             if (colorsLogic != null)
             {
+                CopySharedTaskUi(keypadLogic, colorsLogic);
                 colorsLogic.myStation = this;
                 colorsLogic.enabled = true;
             }
-            // Копируем UI элементы если нужно
-            if (keypadLogic != null && colorsLogic != null)
-                CopySharedTaskUi(keypadLogic, colorsLogic);
             break;
             
         case TaskUiLogic.Auto:
@@ -128,16 +129,40 @@ public class TaskStation : MonoBehaviour
             bool useColorsTask = UsesColorTask();
             if (useColorsTask)
             {
-                if (colorsLogic != null) colorsLogic.enabled = true;
+                if (colorsLogic == null)
+                    colorsLogic = EnsureTerminalColorsLogic(keypadLogic);
+
+                if (colorsLogic != null)
+                {
+                    CopySharedTaskUi(keypadLogic, colorsLogic);
+                    colorsLogic.myStation = this;
+                    colorsLogic.enabled = true;
+                }
                 if (keypadLogic != null) keypadLogic.enabled = false;
             }
             else
             {
-                if (keypadLogic != null) keypadLogic.enabled = true;
+                if (keypadLogic != null)
+                {
+                    keypadLogic.myStation = this;
+                    keypadLogic.enabled = true;
+                }
                 if (colorsLogic != null) colorsLogic.enabled = false;
             }
             break;
         }
+    }
+
+    TerminalColorsTaskLogic EnsureTerminalColorsLogic(KeypadTaskLogic keypadLogic)
+    {
+        if (keypadLogic == null)
+            return null;
+
+        TerminalColorsTaskLogic existingLogic = keypadLogic.GetComponent<TerminalColorsTaskLogic>();
+        if (existingLogic != null)
+            return existingLogic;
+
+        return keypadLogic.gameObject.AddComponent<TerminalColorsTaskLogic>();
     }
 
     bool UsesColorTask()

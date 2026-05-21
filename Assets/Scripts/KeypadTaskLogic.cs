@@ -30,6 +30,8 @@ public class KeypadTaskLogic : MonoBehaviour
     string currentInput = "";
     float timeRemaining;
     bool isGameActive = false;
+    int lastPressedDigit = -1;
+    int lastPressedFrame = -1;
 
     void OnEnable()
     {
@@ -140,6 +142,8 @@ public class KeypadTaskLogic : MonoBehaviour
         }
 
         requiredCode = Random.Range(1000, 10000).ToString();
+        lastPressedDigit = -1;
+        lastPressedFrame = -1;
 
         if (targetCodeText != null)
         {
@@ -155,6 +159,12 @@ public class KeypadTaskLogic : MonoBehaviour
         if (!isGameActive || currentInput.Length >= 4)
             return;
 
+        // Один UI-клик/клавиша иногда вызывает onClick дважды в один кадр.
+        if (lastPressedDigit == number && lastPressedFrame == Time.frameCount)
+            return;
+
+        lastPressedDigit = number;
+        lastPressedFrame = Time.frameCount;
         currentInput += number.ToString();
 
         if (inputCodeText != null)
