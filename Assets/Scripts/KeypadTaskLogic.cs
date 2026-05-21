@@ -140,11 +140,8 @@ public class KeypadTaskLogic : MonoBehaviour
 
     void CloseWindowWithFail()
     {
-        if (myStation != null)
+        if (myStation == null)
         {
-            
-            myStation.taskUIPanel.SetActive(false);
-
             PlayerMovement player = FindObjectOfType<PlayerMovement>();
             if (player != null) player.enabled = true;
 
@@ -153,7 +150,10 @@ public class KeypadTaskLogic : MonoBehaviour
 
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            return;
         }
+        
+        myStation.FailTask();
     }
 
     void FinishGame()

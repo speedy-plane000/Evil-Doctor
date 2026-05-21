@@ -140,11 +140,12 @@ public class StartMenuController : MonoBehaviour
         GameObject container = new GameObject(label + "Container", typeof(RectTransform));
         container.transform.SetParent(parent, false);
         RectTransform containerRect = container.GetComponent<RectTransform>();
-        SetRect(containerRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, new Vector2(720f, 120f));
+        SetRect(containerRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, new Vector2(760f, 140f));
 
         Text labelText = CreateText(label + "Label", container.transform, label, 38, TextAnchor.MiddleLeft);
-        SetRect(labelText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -20f), new Vector2(0f, 40f));
+        SetRect(labelText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -30f), new Vector2(0f, 64f));
         labelText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        labelText.verticalOverflow = VerticalWrapMode.Overflow;
 
         slider = CreateSlider(label + "Slider", container.transform);
         RectTransform sliderRect = slider.GetComponent<RectTransform>();
