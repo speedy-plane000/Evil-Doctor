@@ -11,28 +11,29 @@ public class AN_Button : MonoBehaviour
     public bool isOpened = false;
     public float interactionDistance = 3f;
 
+    [Header("Квест")]
+    public bool countsAsLever = false;
+    public enum LeverFloor { Floor2, Floor1 }
+    public LeverFloor leverFloor;
+
     public bool WasAlreadyPressed => alreadyPressed;
 
     private Animator anim;
     private bool alreadyPressed = false;
+    private PlayerMovement cachedPlayer;
 
     void Start()
     {
         anim = GetComponent<Animator>();
+        cachedPlayer = FindObjectOfType<PlayerMovement>();
     }
 
     void Update()
     {
-        // Ищем игрока поблизости (используем твой скрипт PlayerMovement как маркер)
-        PlayerMovement player = FindObjectOfType<PlayerMovement>();
-        if (player == null) return;
-
-        float dist = Vector3.Distance(transform.position, player.transform.position);
-
+        if (cachedPlayer == null) return;
+        float dist = Vector3.Distance(transform.position, cachedPlayer.transform.position);
         if (Input.GetKeyDown(KeyCode.E) && dist <= interactionDistance)
-        {
             OnPress();
-        }
     }
 
     void OnPress()
@@ -44,6 +45,12 @@ public class AN_Button : MonoBehaviour
                 alreadyPressed = true;
                 floorManager.RegisterLeverPress();
                 PlayAnimation();
+
+                if (countsAsLever)
+                {
+                    if (leverFloor == LeverFloor.Floor2) QuestData.RegisterFloor2Lever();
+                    else QuestData.RegisterFloor1Lever();
+                }
             }
         }
         else if (DoorObject != null)

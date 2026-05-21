@@ -6,7 +6,8 @@ public enum TaskUiLogic
     Auto,
     Keypad,
     TerminalColors,
-    WireTask
+    WireTask,
+    Maze
 }
 
 public class TaskStation : MonoBehaviour
@@ -20,11 +21,11 @@ public class TaskStation : MonoBehaviour
     [Tooltip("Перетащи сюда объект Light, который висит над дверью")]
     public Light doorLight;
 
-    // Массив возможных цветов (Красный, Синий, Зеленый, Желтый, Пурпурный)
+
     public Color[] possibleColors = { Color.red, Color.blue, Color.green, Color.yellow, Color.magenta };
 
     [HideInInspector]
-    public Color targetColor; // Тот самый цвет, который ищет скрипт проводов!
+    public Color targetColor; 
 
     [Header("UI Задания")]
     public GameObject taskUIPanel;
@@ -37,7 +38,6 @@ public class TaskStation : MonoBehaviour
 
     void Start()
     {
-        // При старте игры выбираем случайный цвет из массива и красим лампочку
         if (possibleColors != null && possibleColors.Length > 0)
         {
             targetColor = possibleColors[UnityEngine.Random.Range(0, possibleColors.Length)];
@@ -86,16 +86,27 @@ public class TaskStation : MonoBehaviour
     KeypadTaskLogic keypadLogic = taskUIPanel.GetComponentInChildren<KeypadTaskLogic>(true);
     TerminalColorsTaskLogic colorsLogic = taskUIPanel.GetComponentInChildren<TerminalColorsTaskLogic>(true);
     WireTaskLogic wireLogic = taskUIPanel.GetComponentInChildren<WireTaskLogic>(true);
-    
-    // Отключаем все логики
+    MazeTaskLogic mazeLogic = taskUIPanel.GetComponentInChildren<MazeTaskLogic>(true);
+        
+
+
     if (keypadLogic != null) keypadLogic.enabled = false;
     if (colorsLogic != null) colorsLogic.enabled = false;
     if (wireLogic != null) wireLogic.enabled = false;
+    if (mazeLogic != null) mazeLogic.enabled = false;
 
-    // Включаем нужную логику
-    switch (uiLogic)
+
+        switch (uiLogic)
     {
-        case TaskUiLogic.WireTask:
+            case TaskUiLogic.Maze:
+                if (mazeLogic != null)
+                {
+                    mazeLogic.myStation = this;
+                    mazeLogic.enabled = true;
+                }
+                break;
+
+            case TaskUiLogic.WireTask:
             if (wireLogic != null)
             {
                 wireLogic.myStation = this;
@@ -122,10 +133,10 @@ public class TaskStation : MonoBehaviour
                 colorsLogic.enabled = true;
             }
             break;
-            
+        
         case TaskUiLogic.Auto:
         default:
-            // Автоопределение по имени (старая логика)
+            
             bool useColorsTask = UsesColorTask();
             if (useColorsTask)
             {
@@ -197,27 +208,24 @@ public class TaskStation : MonoBehaviour
         }
     }
 
-    // Вызывается при правильном решении любой мини-игры
     public void CompleteTask()
     {
         isTaskCompleted = true;
 
         if (doorLight != null)
-            doorLight.color = Color.green; // Меняем цвет лампочки на зеленый (успех)
+            doorLight.color = Color.green; 
 
         CloseTaskWindow();
 
         if (targetDoor != null) targetDoor.Action();
     }
 
-    // Вызывается при ошибке (например, в проводах или тайм-ауте пин-кода)
     public void FailTask()
     {
         Debug.Log("Задание провалено! Окно закрывается.");
         CloseTaskWindow();
     }
 
-    // Общая функция закрытия интерфейса и разморозки игрока
     private void CloseTaskWindow()
     {
         isTaskActive = false;
