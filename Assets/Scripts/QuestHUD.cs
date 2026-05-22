@@ -35,10 +35,6 @@ public class QuestHUD : MonoBehaviour
             if (!QuestData.Floor2MainDone)
                 AppendCounter(sb, "Активировать рычаги",
                     QuestData.Floor2LeversDone, QuestData.Floor2LeversTotal);
-
-            if (QuestData.AntidoteVisible)
-                AppendSide(sb, "Найти антидот", QuestData.AntidoteDone);
-            sb.AppendLine();
         }
 
         if (QuestData.Floor1Visible)

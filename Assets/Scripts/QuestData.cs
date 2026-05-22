@@ -24,6 +24,20 @@ public static class QuestData
     public static bool AntidoteVisible { get; private set; }
     public static bool AntidoteDone { get; private set; }
 
+    public static void Reset()
+    {
+        Floor3Visible = false;
+        Floor2Visible = false;
+        Floor1Visible = false;
+        Floor3MainDone = false;
+        Floor2MainDone = false;
+        Floor1MainDone = false;
+        Floor2LeversDone = 0;
+        Floor1LeversDone = 0;
+        AntidoteVisible = false;
+        AntidoteDone = false;
+    }
+
     public static void RevealFloor3()
     {
         Floor3Visible = true;

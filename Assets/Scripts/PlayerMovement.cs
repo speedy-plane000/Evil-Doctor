@@ -7,7 +7,7 @@ public class PlayerMovement : MonoBehaviour
     public float crouchHeight = 1f;
     public float standHeight = 2f;
     public float crouchSpeed = 2.5f;
-    private bool isCrouching;
+    public bool isCrouching;
 
     [Header("Movement")]
     public float walkSpeed = 5f;
@@ -32,20 +32,32 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController controller;
     private Vector3 velocity;
     private bool isGrounded;
+    private float defaultWalkSpeed;
 
     public AudioSource footstepAudio;
     public float stepDelay = 0.5f;
-
     private float stepTimer;
+
     public Transform mainCamera;
+    public bool isMainPlayer = true;
+
+    public bool IsMakingNoise
+    {
+        get
+        {
+            if (!isGrounded || isCrouching) return false;
+            float x = Input.GetAxis("Horizontal");
+            float z = Input.GetAxis("Vertical");
+            return x != 0 || z != 0;
+        }
+    }
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
         defaultYPos = mainCamera.transform.localPosition.y;
+        defaultWalkSpeed = walkSpeed;
     }
-
-    public bool isMainPlayer = true;
 
     void Update()
     {
@@ -121,8 +133,6 @@ public class PlayerMovement : MonoBehaviour
     void PlaySurfaceSpecificSound()
     {
         RaycastHit hit;
-
-
         if (Physics.Raycast(transform.position, Vector3.down, out hit, 15f))
         {
             switch (hit.collider.tag)
@@ -145,18 +155,17 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleCrouch()
     {
-        if (Input.GetKeyDown(KeyCode.LeftControl))
+        if (Input.GetKey(KeyCode.LeftControl))
         {
             isCrouching = true;
             controller.height = crouchHeight;
             walkSpeed = crouchSpeed;
         }
-
-        if (Input.GetKeyUp(KeyCode.LeftControl))
+        else
         {
             isCrouching = false;
             controller.height = standHeight;
-            walkSpeed = 5f;
+            walkSpeed = defaultWalkSpeed;
         }
     }
 
