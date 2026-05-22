@@ -13,6 +13,7 @@ public class PauseMenuController : MonoBehaviour
     GameObject overlayRoot;
     Slider volumeSlider;
     Slider sensitivitySlider;
+    Button crosshairToggleButton;
     Text controlsText;
     Font uiFont;
 
@@ -86,7 +87,10 @@ public class PauseMenuController : MonoBehaviour
         Cursor.visible = pauseActive;
 
         if (pauseActive)
+        {
+            UpdateCrosshairToggleButtonLabel();
             UpdateControlHints();
+        }
     }
 
     void BuildUi()
@@ -111,7 +115,11 @@ public class PauseMenuController : MonoBehaviour
         SetRect(header.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -80f), new Vector2(600f, 80f));
 
         CreateLabeledSlider(overlayRoot.transform, "Громкость", new Vector2(0f, 200f), out volumeSlider, ApplyVolume);
-        CreateLabeledSlider(overlayRoot.transform, "Чувствительность мыши", new Vector2(0f, 60f), out sensitivitySlider, ApplyMouseSensitivity);
+        CreateLabeledSlider(overlayRoot.transform, "Чувствительность мыши", new Vector2(0f, 60f), out sensitivitySlider, ApplyMouseSensitivity, -38f);
+
+        crosshairToggleButton = CreateButton("CrosshairToggleButton", overlayRoot.transform, CrosshairSettings.GetToggleButtonLabel());
+        SetRect(crosshairToggleButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -60f), new Vector2(520f, 84f));
+        crosshairToggleButton.onClick.AddListener(ToggleCrosshair);
 
         controlsText = CreateText("ControlsText", overlayRoot.transform, string.Empty, 38, TextAnchor.UpperCenter);
         controlsText.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -208,7 +216,7 @@ public class PauseMenuController : MonoBehaviour
         Object.DontDestroyOnLoad(eventSystem);
     }
 
-    void CreateLabeledSlider(Transform parent, string label, Vector2 anchoredPosition, out Slider slider, UnityEngine.Events.UnityAction<float> onValueChanged)
+    void CreateLabeledSlider(Transform parent, string label, Vector2 anchoredPosition, out Slider slider, UnityEngine.Events.UnityAction<float> onValueChanged, float labelYOffset = -30f)
     {
         GameObject container = new GameObject(label + "Container", typeof(RectTransform));
         container.transform.SetParent(parent, false);
@@ -216,7 +224,7 @@ public class PauseMenuController : MonoBehaviour
         SetRect(containerRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, new Vector2(790f, 160f));
 
         Text labelText = CreateText(label + "Label", container.transform, label, 38, TextAnchor.MiddleLeft);
-        SetRect(labelText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -30f), new Vector2(0f, 64f));
+        SetRect(labelText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, labelYOffset), new Vector2(0f, 64f));
         labelText.horizontalOverflow = HorizontalWrapMode.Wrap;
         labelText.verticalOverflow = VerticalWrapMode.Overflow;
 
@@ -225,10 +233,26 @@ public class PauseMenuController : MonoBehaviour
         sliderRect.anchorMin = new Vector2(0f, 0f);
         sliderRect.anchorMax = new Vector2(1f, 0f);
         sliderRect.pivot = new Vector2(0.5f, 0f);
-        sliderRect.anchoredPosition = new Vector2(0f, 0f);
+        sliderRect.anchoredPosition = Vector2.zero;
         sliderRect.sizeDelta = new Vector2(0f, 48f);
         slider.onValueChanged.AddListener(onValueChanged);
         slider.SetValueWithoutNotify(DefaultSliderValue);
+    }
+
+    void ToggleCrosshair()
+    {
+        CrosshairSettings.IsCrosshairEnabled = !CrosshairSettings.IsCrosshairEnabled;
+        UpdateCrosshairToggleButtonLabel();
+    }
+
+    void UpdateCrosshairToggleButtonLabel()
+    {
+        if (crosshairToggleButton == null)
+            return;
+
+        Text label = crosshairToggleButton.GetComponentInChildren<Text>();
+        if (label != null)
+            label.text = CrosshairSettings.GetToggleButtonLabel();
     }
 
     Image CreateImage(string name, Transform parent, Color color)
@@ -255,6 +279,23 @@ public class PauseMenuController : MonoBehaviour
         return text;
     }
 
+    Button CreateButton(string name, Transform parent, string label)
+    {
+        Image buttonImage = CreateImage(name, parent, Color.black);
+        Button button = buttonImage.gameObject.AddComponent<Button>();
+        ColorBlock colors = button.colors;
+        colors.normalColor = Color.black;
+        colors.highlightedColor = new Color(0.15f, 0.15f, 0.15f, 1f);
+        colors.pressedColor = new Color(0.3f, 0.3f, 0.3f, 1f);
+        colors.selectedColor = colors.highlightedColor;
+        colors.disabledColor = new Color(0.1f, 0.1f, 0.1f, 0.7f);
+        button.colors = colors;
+        AddWhiteOutline(button.gameObject);
+
+        Text text = CreateText("Label", button.transform, label, 46, TextAnchor.MiddleCenter);
+        StretchToFullScreen(text.rectTransform);
+        return button;
+    }
     Slider CreateSlider(string name, Transform parent)
     {
         GameObject sliderObject = new GameObject(name, typeof(RectTransform), typeof(Slider));
@@ -293,6 +334,12 @@ public class PauseMenuController : MonoBehaviour
         return slider;
     }
 
+    void AddWhiteOutline(GameObject target)
+    {
+        Outline outline = target.AddComponent<Outline>();
+        outline.effectColor = Color.white;
+        outline.effectDistance = new Vector2(2f, -2f);
+    }
     void StretchToFullScreen(RectTransform rectTransform)
     {
         rectTransform.anchorMin = Vector2.zero;

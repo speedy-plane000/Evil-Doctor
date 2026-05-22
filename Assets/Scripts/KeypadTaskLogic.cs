@@ -22,7 +22,7 @@ public class KeypadTaskLogic : MonoBehaviour
     public Transform buttonsRoot;
 
     [Header("Настройки сложности")]
-    public float timeLimit = 5f;
+    public float timeLimit = 6f;
 
     static readonly int[] KeypadDigits = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
 

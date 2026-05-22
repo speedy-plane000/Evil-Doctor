@@ -123,7 +123,7 @@ public class StartMenuController : MonoBehaviour
         SetRect(header.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(500f, 70f));
 
         CreateLabeledSlider(window.transform, "Громкость", new Vector2(0f, 70f), out volumeSlider, ApplyVolume);
-        CreateLabeledSlider(window.transform, "Чувствительность мыши", new Vector2(0f, -70f), out sensitivitySlider, ApplyMouseSensitivity);
+        CreateLabeledSlider(window.transform, "Чувствительность мыши", new Vector2(0f, -80f), out sensitivitySlider, ApplyMouseSensitivity);
 
         Button backButton = CreateButton("BackButton", window.transform, "Назад");
         RectTransform backRect = backButton.GetComponent<RectTransform>();

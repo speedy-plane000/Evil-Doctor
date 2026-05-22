@@ -39,9 +39,6 @@ public class TerminalColorsTaskLogic : MonoBehaviour
         "СИНИЙ"
     };
 
-    const string SequencePromptPrefix = "Нажми: ";
-    const string SequenceSeparator = " → ";
-
     float timeRemaining;
     bool isGameActive;
     int currentStep;
@@ -58,17 +55,6 @@ public class TerminalColorsTaskLogic : MonoBehaviour
             return;
 
         timeRemaining -= Time.deltaTime;
-
-        if (timerText != null)
-        {
-            timerText.text = "TIME: " + Mathf.Max(0, timeRemaining).ToString("F2") + "s";
-            timerText.color = timeRemaining <= 2f ? Color.red : Color.white;
-        }
-
-        if (timerSlider != null)
-        {
-            timerSlider.value = timeRemaining;
-        }
 
         if (timeRemaining <= 0f)
         {
@@ -158,12 +144,18 @@ public class TerminalColorsTaskLogic : MonoBehaviour
         {
             timerSlider.maxValue = timeLimit;
             timerSlider.value = timeLimit;
+            timerSlider.gameObject.SetActive(false);
+        }
+
+        if (timerText != null)
+        {
+            timerText.text = string.Empty;
+            timerText.gameObject.SetActive(false);
         }
 
         if (targetCodeText != null)
         {
-            targetCodeText.text = SequencePromptPrefix + string.Join(SequenceSeparator, RequiredSequenceNames);
-            targetCodeText.color = Color.yellow;
+            targetCodeText.text = string.Empty;
         }
     }
 

@@ -1,27 +1,44 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Collider))]
 public class SilentZone : MonoBehaviour
 {
     [Header("Настройки зоны")]
     [Tooltip("Точка респавна — если не задана, берётся последний checkpoint игрока")]
     public Transform overrideRespawnPoint;
 
-    [Tooltip("Минимальный ввод, при котором считается движение")]
-    public float inputThreshold = 0.1f;
-
     PlayerRespawn playerRespawn;
     bool playerInside;
+    bool skipStayChecksUntilExit;
+
+    void Reset()
+    {
+        EnsureTriggerCollider();
+    }
+
+    void Awake()
+    {
+        EnsureTriggerCollider();
+    }
 
     void OnTriggerEnter(Collider other)
     {
-        PlayerRespawn respawn = PlayerRespawnResolver.ResolveFromCollider(other);
-        if (respawn == null) return;
+        if (!TryTrackPlayer(other))
+            return;
 
-        playerRespawn = respawn;
-        playerInside = true;
+        skipStayChecksUntilExit = false;
+        RespawnIfCtrlNotHeld();
+    }
 
-        if (overrideRespawnPoint != null)
-            playerRespawn.SetCheckpoint(overrideRespawnPoint);
+    void OnTriggerStay(Collider other)
+    {
+        if (skipStayChecksUntilExit)
+            return;
+
+        if (!playerInside && !TryTrackPlayer(other))
+            return;
+
+        RespawnIfCtrlNotHeld();
     }
 
     void OnTriggerExit(Collider other)
@@ -31,21 +48,43 @@ public class SilentZone : MonoBehaviour
 
         playerInside = false;
         playerRespawn = null;
+        skipStayChecksUntilExit = false;
     }
 
-    void Update()
+    void RespawnIfCtrlNotHeld()
     {
         if (!playerInside || playerRespawn == null) return;
 
-        bool isMoving = Mathf.Abs(Input.GetAxis("Horizontal")) > inputThreshold
-                     || Mathf.Abs(Input.GetAxis("Vertical")) > inputThreshold;
+        bool isCrouching = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
-        bool isCrouching = Input.GetKey(KeyCode.LeftControl);
-
-        if (isMoving && !isCrouching)
+        if (!isCrouching)
         {
             playerInside = false;
             playerRespawn.RespawnAtCheckpoint();
+            playerRespawn = null;
+            skipStayChecksUntilExit = true;
         }
+    }
+
+    void EnsureTriggerCollider()
+    {
+        Collider zoneCollider = GetComponent<Collider>();
+        if (zoneCollider != null)
+            zoneCollider.isTrigger = true;
+    }
+
+    bool TryTrackPlayer(Collider other)
+    {
+        PlayerRespawn respawn = PlayerRespawnResolver.ResolveFromCollider(other);
+        if (respawn == null)
+            return false;
+
+        playerRespawn = respawn;
+        playerInside = true;
+
+        if (overrideRespawnPoint != null)
+            playerRespawn.SetCheckpoint(overrideRespawnPoint);
+
+        return true;
     }
 }
