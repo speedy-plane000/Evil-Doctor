@@ -125,7 +125,7 @@ public class PauseMenuController : MonoBehaviour
         controlsText = CreateText("ControlsText", overlayRoot.transform, string.Empty, 38, TextAnchor.UpperCenter);
         controlsText.horizontalOverflow = HorizontalWrapMode.Wrap;
         controlsText.verticalOverflow = VerticalWrapMode.Overflow;
-        SetRect(controlsText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -220f), new Vector2(1400f, 320f));
+        SetRect(controlsText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -280f), new Vector2(1400f, 320f));
     }
 
     void SyncSliderValuesWithCurrentSettings()

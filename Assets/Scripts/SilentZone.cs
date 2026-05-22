@@ -9,7 +9,6 @@ public class SilentZone : MonoBehaviour
 
     PlayerRespawn playerRespawn;
     bool playerInside;
-    bool skipStayChecksUntilExit;
 
     void Reset()
     {
@@ -26,15 +25,11 @@ public class SilentZone : MonoBehaviour
         if (!TryTrackPlayer(other))
             return;
 
-        skipStayChecksUntilExit = false;
         RespawnIfCtrlNotHeld();
     }
 
     void OnTriggerStay(Collider other)
     {
-        if (skipStayChecksUntilExit)
-            return;
-
         if (!playerInside && !TryTrackPlayer(other))
             return;
 
@@ -48,7 +43,6 @@ public class SilentZone : MonoBehaviour
 
         playerInside = false;
         playerRespawn = null;
-        skipStayChecksUntilExit = false;
     }
 
     void RespawnIfCtrlNotHeld()
@@ -62,7 +56,6 @@ public class SilentZone : MonoBehaviour
             playerInside = false;
             playerRespawn.RespawnAtCheckpoint();
             playerRespawn = null;
-            skipStayChecksUntilExit = true;
         }
     }
 

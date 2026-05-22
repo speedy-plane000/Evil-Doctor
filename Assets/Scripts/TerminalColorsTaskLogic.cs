@@ -49,19 +49,6 @@ public class TerminalColorsTaskLogic : MonoBehaviour
         StartRound();
     }
 
-    void Update()
-    {
-        if (!isGameActive)
-            return;
-
-        timeRemaining -= Time.deltaTime;
-
-        if (timeRemaining <= 0f)
-        {
-            TimeOut();
-        }
-    }
-
     void SetupColorButtons()
     {
         Transform root = ResolveButtonsRoot();
@@ -202,20 +189,13 @@ public class TerminalColorsTaskLogic : MonoBehaviour
 
     void ResetSequence()
     {
-        if (timeRemaining > 0f)
-        {
-            currentStep = 0;
-            isGameActive = true;
+        currentStep = 0;
+        isGameActive = true;
 
-            if (inputCodeText != null)
-            {
-                inputCodeText.text = GetStepText(1);
-                inputCodeText.color = Color.white;
-            }
-        }
-        else
+        if (inputCodeText != null)
         {
-            TimeOut();
+            inputCodeText.text = GetStepText(1);
+            inputCodeText.color = Color.white;
         }
     }
 
