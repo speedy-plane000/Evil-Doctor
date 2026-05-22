@@ -31,7 +31,7 @@ public class PauseMenuController : MonoBehaviour
         CacheGameplayComponents();
         uiFont = LoadFont();
         BuildUi();
-        ApplyInitialSliderValues();
+        SyncSliderValuesWithCurrentSettings();
         SetPauseState(false);
     }
 
@@ -88,6 +88,7 @@ public class PauseMenuController : MonoBehaviour
 
         if (pauseActive)
         {
+            SyncSliderValuesWithCurrentSettings();
             UpdateCrosshairToggleButtonLabel();
             UpdateControlHints();
         }
@@ -114,20 +115,20 @@ public class PauseMenuController : MonoBehaviour
         Text header = CreateText("Header", overlayRoot.transform, "Пауза", 64, TextAnchor.MiddleCenter);
         SetRect(header.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -80f), new Vector2(600f, 80f));
 
-        CreateLabeledSlider(overlayRoot.transform, "Громкость", new Vector2(0f, 200f), out volumeSlider, ApplyVolume);
-        CreateLabeledSlider(overlayRoot.transform, "Чувствительность мыши", new Vector2(0f, 60f), out sensitivitySlider, ApplyMouseSensitivity, -38f);
+        CreateLabeledSlider(overlayRoot.transform, "Громкость", new Vector2(0f, 300f), out volumeSlider, ApplyVolume, -60f);
+        CreateLabeledSlider(overlayRoot.transform, "Чувствительность мыши", new Vector2(0f, 150f), out sensitivitySlider, ApplyMouseSensitivity, -60f);
 
         crosshairToggleButton = CreateButton("CrosshairToggleButton", overlayRoot.transform, CrosshairSettings.GetToggleButtonLabel());
-        SetRect(crosshairToggleButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -60f), new Vector2(520f, 84f));
+        SetRect(crosshairToggleButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -30f), new Vector2(520f, 84f));
         crosshairToggleButton.onClick.AddListener(ToggleCrosshair);
 
         controlsText = CreateText("ControlsText", overlayRoot.transform, string.Empty, 38, TextAnchor.UpperCenter);
         controlsText.horizontalOverflow = HorizontalWrapMode.Wrap;
         controlsText.verticalOverflow = VerticalWrapMode.Overflow;
-        SetRect(controlsText.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 250f), new Vector2(1400f, 420f));
+        SetRect(controlsText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -220f), new Vector2(1400f, 320f));
     }
 
-    void ApplyInitialSliderValues()
+    void SyncSliderValuesWithCurrentSettings()
     {
         float volumeValue = Mathf.Clamp01(AudioListener.volume);
         volumeSlider.SetValueWithoutNotify(volumeValue);

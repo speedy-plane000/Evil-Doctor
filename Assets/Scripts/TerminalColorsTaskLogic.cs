@@ -73,8 +73,8 @@ public class TerminalColorsTaskLogic : MonoBehaviour
         {
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = 2;
-            grid.cellSize = new Vector2(170f, 170f);
-            grid.spacing = new Vector2(24f, 24f);
+            grid.cellSize = new Vector2(150f, 150f);
+            grid.spacing = new Vector2(16f, 16f);
         }
 
         List<Button> buttons = new List<Button>();
@@ -99,7 +99,7 @@ public class TerminalColorsTaskLogic : MonoBehaviour
 
             RectTransform rectTransform = button.transform as RectTransform;
             if (rectTransform != null)
-                rectTransform.sizeDelta = new Vector2(170f, 170f);
+                rectTransform.sizeDelta = new Vector2(150f, 150f);
 
             Image image = button.targetGraphic as Image;
             if (image == null)

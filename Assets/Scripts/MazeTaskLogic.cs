@@ -103,7 +103,7 @@ public class MazeTaskLogic : MonoBehaviour
             for (int c = 0; c < mazeWidth; c++)
             {
                 Color cell;
-                if (r == playerPos.x && c == playerPos.y) cell = Color.white;
+                if (r == playerPos.x && c == playerPos.y) cell = Color.black;
                 else if (r == startPos.x && c == startPos.y) cell = Color.green;
                 else if (r == endPos.x && c == endPos.y) cell = Color.red;
                 else if (GetCell(r, c) == 1) cell = new Color(0.15f, 0.15f, 0.15f);

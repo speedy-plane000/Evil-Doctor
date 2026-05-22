@@ -15,6 +15,7 @@ public class StartMenuController : MonoBehaviour
     GameObject settingsPanel;
     Slider volumeSlider;
     Slider sensitivitySlider;
+    Button crosshairToggleButton;
     Font uiFont;
     PlayerMovement[] playerMovements;
     MouseLook[] mouseLooks;
@@ -116,21 +117,25 @@ public class StartMenuController : MonoBehaviour
     void BuildSettingsPanel(Transform parent)
     {
         Image window = CreateImage("Window", parent, Color.black);
-        SetRect(window.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900f, 540f));
+        SetRect(window.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980f, 710f));
         AddWhiteOutline(window.gameObject);
 
         Text header = CreateText("Header", window.transform, "Настройки", 58, TextAnchor.MiddleCenter);
         SetRect(header.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(500f, 70f));
 
-        CreateLabeledSlider(window.transform, "Громкость", new Vector2(0f, 70f), out volumeSlider, ApplyVolume);
-        CreateLabeledSlider(window.transform, "Чувствительность мыши", new Vector2(0f, -80f), out sensitivitySlider, ApplyMouseSensitivity);
+        CreateLabeledSlider(window.transform, "Громкость", new Vector2(0f, 130f), out volumeSlider, ApplyVolume);
+        CreateLabeledSlider(window.transform, "Чувствительность мыши", new Vector2(0f, -50f), out sensitivitySlider, ApplyMouseSensitivity);
+
+        crosshairToggleButton = CreateButton("CrosshairToggleButton", window.transform, CrosshairSettings.GetToggleButtonLabel());
+        SetRect(crosshairToggleButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -190f), new Vector2(520f, 84f));
+        crosshairToggleButton.onClick.AddListener(ToggleCrosshair);
 
         Button backButton = CreateButton("BackButton", window.transform, "Назад");
         RectTransform backRect = backButton.GetComponent<RectTransform>();
         backRect.anchorMin = new Vector2(1f, 0f);
         backRect.anchorMax = new Vector2(1f, 0f);
         backRect.pivot = new Vector2(1f, 0f);
-        backRect.anchoredPosition = new Vector2(-30f, 30f);
+        backRect.anchoredPosition = new Vector2(-30f, 25f);
         backRect.sizeDelta = new Vector2(280f, 80f);
         backButton.onClick.AddListener(CloseSettings);
     }
@@ -143,7 +148,7 @@ public class StartMenuController : MonoBehaviour
         SetRect(containerRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, new Vector2(790f, 160f));
 
         Text labelText = CreateText(label + "Label", container.transform, label, 38, TextAnchor.MiddleLeft);
-        SetRect(labelText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -30f), new Vector2(0f, 64f));
+        SetRect(labelText.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -60f), new Vector2(0f, 64f));
         labelText.horizontalOverflow = HorizontalWrapMode.Wrap;
         labelText.verticalOverflow = VerticalWrapMode.Overflow;
 
@@ -186,6 +191,7 @@ public class StartMenuController : MonoBehaviour
 
     void OpenSettings()
     {
+        UpdateCrosshairToggleButtonLabel();
         mainPanel.SetActive(false);
         settingsPanel.SetActive(true);
     }
@@ -217,6 +223,22 @@ public class StartMenuController : MonoBehaviour
             if (mouseLook != null)
                 mouseLook.mouseSensitivity = sensitivity;
         }
+    }
+
+    void ToggleCrosshair()
+    {
+        CrosshairSettings.IsCrosshairEnabled = !CrosshairSettings.IsCrosshairEnabled;
+        UpdateCrosshairToggleButtonLabel();
+    }
+
+    void UpdateCrosshairToggleButtonLabel()
+    {
+        if (crosshairToggleButton == null)
+            return;
+
+        Text label = crosshairToggleButton.GetComponentInChildren<Text>();
+        if (label != null)
+            label.text = CrosshairSettings.GetToggleButtonLabel();
     }
 
     Font LoadFont()
