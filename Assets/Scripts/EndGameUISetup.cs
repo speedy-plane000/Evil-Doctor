@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// Вспомогательный скрипт для настройки UI окончания игры
@@ -121,13 +124,8 @@ public class EndGameUISetup : MonoBehaviour
             rectTransform.offsetMax = Vector2.zero;
         }
         
-        // Настраиваем EndGameManager
-        var serializedObject = new UnityEditor.SerializedObject(endGameManager);
-        serializedObject.FindProperty("fadeOverlay").objectReferenceValue = fadeOverlay;
-        serializedObject.FindProperty("messageText").objectReferenceValue = messageText;
-        serializedObject.FindProperty("timerText").objectReferenceValue = timerText;
-        serializedObject.FindProperty("endGameUI").objectReferenceValue = endGameUI;
-        serializedObject.ApplyModifiedProperties();
+ 
+   
         
         // Деактивируем UI
         endGameUI.SetActive(false);

@@ -43,7 +43,9 @@ public class BottlePickup : MonoBehaviour
         {
             endGameManager.ShowMessage(pickupMessage, messageDuration, Color.green);
         }
-        
+
+        QuestData.CompleteAntidote();
+
         // Деактивируем объект
         _isPickedUp = true;
         gameObject.SetActive(false);

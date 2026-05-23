@@ -24,14 +24,6 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
-    void Start()
-    {
-        // Устанавливаем начальный чекпоинт в точке появления игрока
-        var spawn = GameObject.FindWithTag("Respawn");
-        if (spawn != null)
-            CheckpointManager.Instance?.RegisterSpawn(spawn.transform.position,
-                                                      spawn.transform.rotation);
-    }
 
     /// <summary>Вызывается при смене этажа (через триггеры переходов).</summary>
     public void SetFloor(int floor)

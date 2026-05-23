@@ -29,6 +29,9 @@ public class EndGameManager : MonoBehaviour
     [SerializeField] private string timeoutMessage = "Вы вышли на солнце и умерли, так как не успели ввести антидот, чтобы обезвредить препарат, введённый вам доктором";
     [SerializeField] private string successMessage = "Вы успешно сбежали от злого доктора!";
     
+    [Header("Прочее")]
+    [SerializeField] private GameObject questHUD;
+
     // Состояние
     private bool _antidoteCollected = false;
     private bool _isEndGameInProgress = false;
@@ -105,7 +108,21 @@ public class EndGameManager : MonoBehaviour
     public void StartEndGameSequence()
     {
         if (_isEndGameInProgress) return;
+
+        if (questHUD != null)
+            questHUD.SetActive(false);
+
         
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            var rb = player.GetComponent<Rigidbody>();
+            if (rb != null) rb.linearVelocity = Vector3.zero;
+
+            var movement = player.GetComponent<PlayerMovement>();
+            if (movement != null) movement.enabled = false;
+        }
+
         _isEndGameInProgress = true;
         _endGameCoroutine = StartCoroutine(EndGameSequence());
     }
@@ -190,13 +207,10 @@ public class EndGameManager : MonoBehaviour
         {
             timerText.gameObject.SetActive(false);
         }
-        
-        // Убираем затемнение
-        if (fadeOverlay != null)
-        {
-            StartCoroutine(FadeOutScreen());
-        }
-        
+
+        _isFading = false; 
+        StartCoroutine(FadeScreen());
+
         Debug.Log("[EndGameManager] Игрок успешно сбежал!");
         
     }

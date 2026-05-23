@@ -31,6 +31,8 @@ public class EndGameTrigger : MonoBehaviour
     
     void OnTriggerEnter(Collider other)
     {
+        Debug.Log("EndGameTrigger: вошёл " + other.name + " tag=" + other.tag);
+
         if (_hasTriggered && isOneTimeTrigger) return;
         if (!other.CompareTag("Player")) return;
         if (_endGameManager == null) return;
