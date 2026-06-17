@@ -52,8 +52,8 @@ public class TaskStation : MonoBehaviour
 
     void OnDisable()
     {
-        if (isTaskActive)
-            IsAnyTaskUiActive = false;
+        isTaskActive = false;
+        IsAnyTaskUiActive = false;
     }
 
     void Update()
