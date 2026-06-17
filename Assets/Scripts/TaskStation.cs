@@ -13,7 +13,8 @@ public enum TaskUiLogic
 public class TaskStation : MonoBehaviour
 {
     const string ColorTaskNamePattern = "color";
-    public static bool IsAnyTaskUiActive { get; private set; }
+    static int activeTaskUiCount;
+    public static bool IsAnyTaskUiActive => activeTaskUiCount > 0;
 
     [Header("Связь с дверью")]
     public AN_DoorScript targetDoor;
@@ -52,8 +53,11 @@ public class TaskStation : MonoBehaviour
 
     void OnDisable()
     {
-        isTaskActive = false;
-        IsAnyTaskUiActive = false;
+        if (isTaskActive)
+        {
+            isTaskActive = false;
+            activeTaskUiCount = Mathf.Max(0, activeTaskUiCount - 1);
+        }
     }
 
     void Update()
@@ -81,7 +85,7 @@ public class TaskStation : MonoBehaviour
     void StartTask(PlayerMovement player)
     {
         isTaskActive = true;
-        IsAnyTaskUiActive = true;
+        activeTaskUiCount++;
         PrepareTaskUi();
         taskUIPanel.SetActive(true);
 
@@ -243,8 +247,11 @@ public class TaskStation : MonoBehaviour
 
     private void CloseTaskWindow()
     {
-        isTaskActive = false;
-        IsAnyTaskUiActive = false;
+        if (isTaskActive)
+        {
+            isTaskActive = false;
+            activeTaskUiCount = Mathf.Max(0, activeTaskUiCount - 1);
+        }
         taskUIPanel.SetActive(false);
 
         PlayerMovement player = FindObjectOfType<PlayerMovement>();

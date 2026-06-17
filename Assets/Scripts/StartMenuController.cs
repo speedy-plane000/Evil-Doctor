@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class StartMenuController : MonoBehaviour
 {
     const float IntroTextDurationSeconds = 12f;
+    const float IntroFadeOutDurationSeconds = 0.35f;
     const float DefaultSliderValue = 0.5f;
     const float MinMouseSensitivity = 100f;
     const float MaxMouseSensitivity = 700f;
@@ -196,6 +197,15 @@ public class StartMenuController : MonoBehaviour
         if (introText != null)
             introText.gameObject.SetActive(false);
 
+        elapsed = 0f;
+        while (elapsed < IntroFadeOutDurationSeconds)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            blackOverlayGroup.alpha = 1f - Mathf.Clamp01(elapsed / IntroFadeOutDurationSeconds);
+            yield return null;
+        }
+
+        blackOverlayGroup.alpha = 0f;
         SetMenuState(false);
         Destroy(gameObject);
     }
