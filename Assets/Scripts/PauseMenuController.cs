@@ -45,6 +45,9 @@ public class PauseMenuController : MonoBehaviour
         if (Object.FindFirstObjectByType<StartMenuController>() != null)
             return;
 
+        if (TaskStation.IsAnyTaskUiActive)
+            return;
+
         if (Input.GetKeyDown(KeyCode.Escape))
             SetPauseState(!isPaused);
 

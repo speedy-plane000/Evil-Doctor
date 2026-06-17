@@ -5,10 +5,14 @@ using UnityEngine.UI;
 
 public class StartMenuController : MonoBehaviour
 {
-    const float FadeDurationSeconds = 3f;
+    const float IntroTextDurationSeconds = 12f;
     const float DefaultSliderValue = 0.5f;
     const float MinMouseSensitivity = 100f;
     const float MaxMouseSensitivity = 700f;
+    const string IntroTextMessage =
+        "Меню - esc\n" +
+        "Вы проснулись в палате, в которой доктор ставил над вами эксперименты. " +
+        "Сбегите из больницы, пока он ушёл. По пути найдите антидот";
 
     CanvasGroup blackOverlayGroup;
     GameObject mainPanel;
@@ -16,6 +20,7 @@ public class StartMenuController : MonoBehaviour
     Slider volumeSlider;
     Slider sensitivitySlider;
     Button crosshairToggleButton;
+    Text introText;
     Font uiFont;
     PlayerMovement[] playerMovements;
     MouseLook[] mouseLooks;
@@ -92,6 +97,7 @@ public class StartMenuController : MonoBehaviour
 
         BuildMainPanel(mainPanel.transform);
         BuildSettingsPanel(settingsPanel.transform);
+        BuildIntroText(blackOverlay.transform);
 
         settingsPanel.SetActive(false);
     }
@@ -171,22 +177,36 @@ public class StartMenuController : MonoBehaviour
         hasStarted = true;
         mainPanel.SetActive(false);
         settingsPanel.SetActive(false);
-        StartCoroutine(FadeIntoGame());
+        StartCoroutine(ShowIntroAndStartGame());
     }
 
-    IEnumerator FadeIntoGame()
+    IEnumerator ShowIntroAndStartGame()
     {
+        blackOverlayGroup.alpha = 1f;
+        if (introText != null)
+            introText.gameObject.SetActive(true);
+
         float elapsed = 0f;
-        while (elapsed < FadeDurationSeconds)
+        while (elapsed < IntroTextDurationSeconds)
         {
             elapsed += Time.unscaledDeltaTime;
-            blackOverlayGroup.alpha = 1f - Mathf.Clamp01(elapsed / FadeDurationSeconds);
             yield return null;
         }
 
-        blackOverlayGroup.alpha = 0f;
+        if (introText != null)
+            introText.gameObject.SetActive(false);
+
         SetMenuState(false);
         Destroy(gameObject);
+    }
+
+    void BuildIntroText(Transform parent)
+    {
+        introText = CreateText("IntroText", parent, IntroTextMessage, 40, TextAnchor.MiddleCenter);
+        introText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        introText.verticalOverflow = VerticalWrapMode.Overflow;
+        SetRect(introText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400f, 520f));
+        introText.gameObject.SetActive(false);
     }
 
     void OpenSettings()
