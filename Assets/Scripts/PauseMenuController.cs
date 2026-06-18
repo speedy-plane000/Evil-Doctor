@@ -1,6 +1,7 @@
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
@@ -125,6 +126,15 @@ public class PauseMenuController : MonoBehaviour
         SetRect(crosshairToggleButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -30f), new Vector2(520f, 84f));
         crosshairToggleButton.onClick.AddListener(ToggleCrosshair);
 
+        Button mainMenuButton = CreateButton("MainMenuButton", overlayRoot.transform, "Главное меню");
+        RectTransform mainMenuRect = mainMenuButton.GetComponent<RectTransform>();
+        mainMenuRect.anchorMin = new Vector2(1f, 1f);
+        mainMenuRect.anchorMax = new Vector2(1f, 1f);
+        mainMenuRect.pivot = new Vector2(1f, 1f);
+        mainMenuRect.anchoredPosition = new Vector2(-30f, -30f);
+        mainMenuRect.sizeDelta = new Vector2(420f, 80f);
+        mainMenuButton.onClick.AddListener(ReturnToMainMenu);
+
         controlsText = CreateText("ControlsText", overlayRoot.transform, string.Empty, 38, TextAnchor.UpperCenter);
         controlsText.horizontalOverflow = HorizontalWrapMode.Wrap;
         controlsText.verticalOverflow = VerticalWrapMode.Overflow;
@@ -247,6 +257,13 @@ public class PauseMenuController : MonoBehaviour
     {
         CrosshairSettings.IsCrosshairEnabled = !CrosshairSettings.IsCrosshairEnabled;
         UpdateCrosshairToggleButtonLabel();
+    }
+
+    void ReturnToMainMenu()
+    {
+        SetPauseState(false);
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     void UpdateCrosshairToggleButtonLabel()
