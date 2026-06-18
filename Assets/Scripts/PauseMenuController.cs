@@ -262,7 +262,6 @@ public class PauseMenuController : MonoBehaviour
     void ReturnToMainMenu()
     {
         SetPauseState(false);
-        Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 

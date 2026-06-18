@@ -297,7 +297,6 @@ public class EndGameManager : MonoBehaviour
     void ReturnToMainMenu()
     {
         _isEndGameInProgress = false;
-        Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     
