@@ -639,7 +639,7 @@ public class RemotePathfinderHelper : MonoBehaviour
         RemoteLeverSearchParticipant[] participants = FindObjectsByType<RemoteLeverSearchParticipant>(FindObjectsSortMode.None);
         if (participants == null || participants.Length == 0)
         {
-            cachedParticipantLevers = EmptyButtons;
+            cachedParticipantLevers = GetAllLeverButtonsFallback();
             nextParticipantLeversRefreshTime = Time.time + LeverParticipantsRefreshInterval;
             return cachedParticipantLevers;
         }
@@ -660,9 +660,26 @@ public class RemotePathfinderHelper : MonoBehaviour
                 leverBuffer.Add(button);
         }
 
-        cachedParticipantLevers = leverBuffer.Count > 0 ? leverBuffer.ToArray() : EmptyButtons;
+        cachedParticipantLevers = leverBuffer.Count > 0 ? leverBuffer.ToArray() : GetAllLeverButtonsFallback();
         nextParticipantLeversRefreshTime = Time.time + LeverParticipantsRefreshInterval;
         return cachedParticipantLevers;
+    }
+
+    AN_Button[] GetAllLeverButtonsFallback()
+    {
+        AN_Button[] allButtons = FindObjectsByType<AN_Button>(FindObjectsSortMode.None);
+        if (allButtons == null || allButtons.Length == 0)
+            return EmptyButtons;
+
+        leverBuffer.Clear();
+        for (int i = 0; i < allButtons.Length; i++)
+        {
+            AN_Button button = allButtons[i];
+            if (button != null && button.isLever)
+                leverBuffer.Add(button);
+        }
+
+        return leverBuffer.Count > 0 ? leverBuffer.ToArray() : EmptyButtons;
     }
 
     IEnumerator HighlightLever(GameObject leverObject)

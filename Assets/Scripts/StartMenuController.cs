@@ -5,10 +5,17 @@ using UnityEngine.UI;
 
 public class StartMenuController : MonoBehaviour
 {
-    const float FadeDurationSeconds = 3f;
+    const float IntroTextDurationSeconds = 13f;
+    const float IntroFadeOutDurationSeconds = 0.35f;
     const float DefaultSliderValue = 0.5f;
     const float MinMouseSensitivity = 100f;
     const float MaxMouseSensitivity = 700f;
+    const string IntroTextMessage =
+        "Меню - esc.\n" +
+        "В меню будет показано на какие кнопки нужно нажимать, чтобы взаимодействовать с предметами\n" +
+        "Вы проснулись в палате, в которой доктор ставил над вами эксперименты.\n " +
+        "Сбегите из больницы, пока он ненадолго ушёл.\n" + 
+        "Вы чувствуете слабость, на вас действует какой-то препарат. По возможности найдите антидот";
 
     CanvasGroup blackOverlayGroup;
     GameObject mainPanel;
@@ -16,6 +23,7 @@ public class StartMenuController : MonoBehaviour
     Slider volumeSlider;
     Slider sensitivitySlider;
     Button crosshairToggleButton;
+    Text introText;
     Font uiFont;
     PlayerMovement[] playerMovements;
     MouseLook[] mouseLooks;
@@ -92,6 +100,7 @@ public class StartMenuController : MonoBehaviour
 
         BuildMainPanel(mainPanel.transform);
         BuildSettingsPanel(settingsPanel.transform);
+        BuildIntroText(blackOverlay.transform);
 
         settingsPanel.SetActive(false);
     }
@@ -171,22 +180,45 @@ public class StartMenuController : MonoBehaviour
         hasStarted = true;
         mainPanel.SetActive(false);
         settingsPanel.SetActive(false);
-        StartCoroutine(FadeIntoGame());
+        StartCoroutine(ShowIntroAndStartGame());
     }
 
-    IEnumerator FadeIntoGame()
+    IEnumerator ShowIntroAndStartGame()
     {
+        blackOverlayGroup.alpha = 1f;
+        if (introText != null)
+            introText.gameObject.SetActive(true);
+
         float elapsed = 0f;
-        while (elapsed < FadeDurationSeconds)
+        while (elapsed < IntroTextDurationSeconds)
         {
             elapsed += Time.unscaledDeltaTime;
-            blackOverlayGroup.alpha = 1f - Mathf.Clamp01(elapsed / FadeDurationSeconds);
+            yield return null;
+        }
+
+        if (introText != null)
+            introText.gameObject.SetActive(false);
+
+        elapsed = 0f;
+        while (elapsed < IntroFadeOutDurationSeconds)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            blackOverlayGroup.alpha = 1f - Mathf.Clamp01(elapsed / IntroFadeOutDurationSeconds);
             yield return null;
         }
 
         blackOverlayGroup.alpha = 0f;
         SetMenuState(false);
         Destroy(gameObject);
+    }
+
+    void BuildIntroText(Transform parent)
+    {
+        introText = CreateText("IntroText", parent, IntroTextMessage, 40, TextAnchor.MiddleCenter);
+        introText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        introText.verticalOverflow = VerticalWrapMode.Overflow;
+        SetRect(introText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400f, 520f));
+        introText.gameObject.SetActive(false);
     }
 
     void OpenSettings()

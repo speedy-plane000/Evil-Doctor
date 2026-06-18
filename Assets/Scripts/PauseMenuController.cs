@@ -1,6 +1,7 @@
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
@@ -43,6 +44,9 @@ public class PauseMenuController : MonoBehaviour
     void Update()
     {
         if (Object.FindFirstObjectByType<StartMenuController>() != null)
+            return;
+
+        if (TaskStation.IsAnyTaskUiActive)
             return;
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -122,6 +126,15 @@ public class PauseMenuController : MonoBehaviour
         SetRect(crosshairToggleButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -30f), new Vector2(520f, 84f));
         crosshairToggleButton.onClick.AddListener(ToggleCrosshair);
 
+        Button mainMenuButton = CreateButton("MainMenuButton", overlayRoot.transform, "Главное меню");
+        RectTransform mainMenuRect = mainMenuButton.GetComponent<RectTransform>();
+        mainMenuRect.anchorMin = new Vector2(1f, 1f);
+        mainMenuRect.anchorMax = new Vector2(1f, 1f);
+        mainMenuRect.pivot = new Vector2(1f, 1f);
+        mainMenuRect.anchoredPosition = new Vector2(-30f, -30f);
+        mainMenuRect.sizeDelta = new Vector2(420f, 80f);
+        mainMenuButton.onClick.AddListener(ReturnToMainMenu);
+
         controlsText = CreateText("ControlsText", overlayRoot.transform, string.Empty, 38, TextAnchor.UpperCenter);
         controlsText.horizontalOverflow = HorizontalWrapMode.Wrap;
         controlsText.verticalOverflow = VerticalWrapMode.Overflow;
@@ -160,15 +173,15 @@ public class PauseMenuController : MonoBehaviour
         builder.AppendLine("E - Взаимодействие с предметами");
 
         if (remoteCameraDisruptor != null && remoteCameraDisruptor.IsPickedUp)
-            builder.AppendLine("R - отключить ближайшую камеру");
+            builder.AppendLine("R - отключить ближайшую камеру (работает 1 раз)");
 
         if (bottleBlueShield != null && bottleBlueShield.IsPickedUp)
-            builder.AppendLine("Q - стать невидимым для камер на 10 секунд");
+            builder.AppendLine("Q - стать невидимым для камер на 10 секунд (работает  1 раз)");
 
         if (remotePathfinderHelper != null && remotePathfinderHelper.IsPickedUp)
         {
-            builder.AppendLine("F - показать количество клеток здания до выхода");
-            builder.AppendLine("G - показать ближайший рычаг");
+            builder.AppendLine("F - показать количество клеток здания до выхода (перезарядка 30 сек)");
+            builder.AppendLine("G - показать ближайший рычаг (перезарядка 30 сек)");
         }
 
         controlsText.text = builder.ToString().TrimEnd();
@@ -244,6 +257,12 @@ public class PauseMenuController : MonoBehaviour
     {
         CrosshairSettings.IsCrosshairEnabled = !CrosshairSettings.IsCrosshairEnabled;
         UpdateCrosshairToggleButtonLabel();
+    }
+
+    void ReturnToMainMenu()
+    {
+        SetPauseState(false);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     void UpdateCrosshairToggleButtonLabel()

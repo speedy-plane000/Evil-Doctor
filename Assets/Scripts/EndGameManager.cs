@@ -2,14 +2,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using TMPro;
+using UnityEngine.SceneManagement;
 
-/// <summary>
-/// </summary>
 public class EndGameManager : MonoBehaviour
 {
     [Header("Настройки таймера")]
-    [SerializeField] private float fadeDuration = 5f; // время затемнения экрана
-    [SerializeField] private float antidoteInputTime = 5f; // время для ввода антидота
+    [SerializeField] private float fadeDuration = 6f; // время затемнения экрана
+    [SerializeField] private float antidoteInputTime = 6f; // время для ввода антидота
+    [SerializeField] private float returnToMenuDelayAfterBlack = 4f; // время черного экрана перед главным меню
     
     [Header("UI элементы")]
     [SerializeField] private Image fadeOverlay; // затемняющая панель
@@ -35,10 +35,8 @@ public class EndGameManager : MonoBehaviour
     // Состояние
     private bool _antidoteCollected = false;
     private bool _isEndGameInProgress = false;
-    private bool _isFading = false;
-    private float _currentFadeTime = 0f;
+    private bool _antidoteInjectedSuccessfully = false;
     private float _currentAntidoteTime = 0f;
-    private Coroutine _endGameCoroutine;
     
     // Синглтон
     public static EndGameManager Instance { get; private set; }
@@ -88,7 +86,7 @@ public class EndGameManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                AntidoteInjectedSuccessfully();
+                OnAntidoteInjectedSuccessfully();
             }
         }
     }
@@ -123,8 +121,9 @@ public class EndGameManager : MonoBehaviour
             if (movement != null) movement.enabled = false;
         }
 
+        _antidoteInjectedSuccessfully = false;
         _isEndGameInProgress = true;
-        _endGameCoroutine = StartCoroutine(EndGameSequence());
+        StartCoroutine(EndGameSequence());
     }
     
     IEnumerator EndGameSequence()
@@ -138,15 +137,14 @@ public class EndGameManager : MonoBehaviour
         // Если антидот не собран - сразу смерть
         if (!_antidoteCollected)
         {
-            ShowMessage(noAntidoteMessage, float.MaxValue, deathMessageColor);
-            yield return StartCoroutine(FadeScreen());
-            // Здесь можно добавить перезагрузку сцены или переход в меню
+            yield return StartCoroutine(FadeToBlackWithMessageAndReturn(noAntidoteMessage, deathMessageColor));
             Debug.Log("[EndGameManager] Игрок умер без антидота");
             yield break;
         }
         
         // Если антидот собран - даем время на ввод
         ShowMessage(antidotePromptMessage, float.MaxValue, warningMessageColor);
+        UpdateFadeAlpha(0f);
         
         // Запускаем таймер для ввода антидота
         _currentAntidoteTime = antidoteInputTime;
@@ -156,106 +154,104 @@ public class EndGameManager : MonoBehaviour
             timerText.gameObject.SetActive(true);
         }
         
-        // Таймер обратного отсчета
-        while (_currentAntidoteTime > 0 && _isEndGameInProgress)
+        float elapsed = 0f;
+        float safeFadeDuration = Mathf.Max(0.01f, fadeDuration);
+
+        while (_currentAntidoteTime > 0f && _isEndGameInProgress)
         {
             _currentAntidoteTime -= Time.deltaTime;
-            
+            elapsed += Time.deltaTime;
+            UpdateFadeAlpha(elapsed / safeFadeDuration);
+
             if (timerText != null)
             {
-                timerText.text = $"Время: {Mathf.Ceil(_currentAntidoteTime)}с";
-                timerText.color = Color.Lerp(Color.red, Color.yellow, _currentAntidoteTime / antidoteInputTime);
+                float safeInputTime = Mathf.Max(0.01f, antidoteInputTime);
+                timerText.text = $"Время: {Mathf.Ceil(Mathf.Max(0f, _currentAntidoteTime))}с";
+                timerText.color = Color.Lerp(Color.red, Color.yellow, Mathf.Clamp01(_currentAntidoteTime / safeInputTime));
             }
-            
-            // Начинаем постепенное затемнение в последние 2 секунды
-            if (_currentAntidoteTime <= 2f && !_isFading)
-            {
-                StartCoroutine(FadeScreen());
-            }
+
+            if (_antidoteInjectedSuccessfully)
+                break;
             
             yield return null;
+        }
+
+        if (_antidoteInjectedSuccessfully)
+        {
+            _isEndGameInProgress = false;
+            if (timerText != null)
+                timerText.gameObject.SetActive(false);
+
+            ShowMessage(successMessage, 5f, successMessageColor);
+            yield return StartCoroutine(FadeOutScreen(0.75f));
+            Debug.Log("[EndGameManager] Игрок успешно сбежал!");
+            yield break;
         }
         
         // Если время вышло и антидот не введен
         if (_currentAntidoteTime <= 0 && _isEndGameInProgress)
         {
             ShowMessage(timeoutMessage, float.MaxValue, deathMessageColor);
-            yield return new WaitForSeconds(2f);
+            if (timerText != null)
+                timerText.gameObject.SetActive(false);
+
+            UpdateFadeAlpha(1f);
+            yield return new WaitForSecondsRealtime(returnToMenuDelayAfterBlack);
+            ReturnToMainMenu();
             Debug.Log("[EndGameManager] Игрок не успел ввести антидот");
-            // Здесь можно добавить перезагрузку сцены или переход в меню
         }
     }
     
     /// <summary>
     /// Успешный ввод антидота
     /// </summary>
-    private void AntidoteInjectedSuccessfully()
+    private void OnAntidoteInjectedSuccessfully()
     {
         if (!_isEndGameInProgress) return;
         
-        StopAllCoroutines();
-        _isEndGameInProgress = false;
-        
-        // Останавливаем затемнение
-        _isFading = false;
-        
-        // Показываем сообщение об успехе
-        ShowMessage(successMessage, 5f, successMessageColor);
-        
-        // Убираем таймер
-        if (timerText != null)
-        {
-            timerText.gameObject.SetActive(false);
-        }
-
-        _isFading = false; 
-        StartCoroutine(FadeScreen());
-
-        Debug.Log("[EndGameManager] Игрок успешно сбежал!");
-        
+        _antidoteInjectedSuccessfully = true;
     }
     
-    /// <summary>
-    /// Затемнение экрана
-    /// </summary>
-    IEnumerator FadeScreen()
+    IEnumerator FadeToBlackWithMessageAndReturn(string message, Color messageColor)
     {
-        if (_isFading || fadeOverlay == null) yield break;
-        
-        _isFading = true;
-        _currentFadeTime = 0f;
-        
-        while (_currentFadeTime < fadeDuration && _isFading)
+        ShowMessage(message, float.MaxValue, messageColor);
+        if (timerText != null)
+            timerText.gameObject.SetActive(false);
+
+        float safeFadeDuration = Mathf.Max(0.01f, fadeDuration);
+        float elapsed = 0f;
+        while (elapsed < safeFadeDuration)
         {
-            _currentFadeTime += Time.deltaTime;
-            float alpha = Mathf.Clamp01(_currentFadeTime / fadeDuration);
-            fadeOverlay.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, alpha);
+            elapsed += Time.deltaTime;
+            UpdateFadeAlpha(elapsed / safeFadeDuration);
             yield return null;
         }
         
-        if (_isFading)
-        {
-            fadeOverlay.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, 1f);
-        }
+        yield return new WaitForSecondsRealtime(returnToMenuDelayAfterBlack);
+        ReturnToMainMenu();
     }
     
     /// <summary>
     /// Убрать затемнение экрана
     /// </summary>
-    IEnumerator FadeOutScreen()
+    IEnumerator FadeOutScreen(float duration)
     {
+        if (fadeOverlay == null)
+            yield break;
+
+        float safeDuration = Mathf.Max(0.01f, duration);
         float startAlpha = fadeOverlay.color.a;
         float time = 0f;
         
-        while (time < 1f)
+        while (time < safeDuration)
         {
             time += Time.deltaTime;
-            float alpha = Mathf.Lerp(startAlpha, 0f, time);
-            fadeOverlay.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, alpha);
+            float alpha = Mathf.Lerp(startAlpha, 0f, Mathf.Clamp01(time / safeDuration));
+            UpdateFadeAlpha(alpha);
             yield return null;
         }
         
-        fadeOverlay.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, 0f);
+        UpdateFadeAlpha(0f);
     }
     
     /// <summary>
@@ -284,6 +280,20 @@ public class EndGameManager : MonoBehaviour
         }
     }
     
+    void UpdateFadeAlpha(float value)
+    {
+        if (fadeOverlay == null)
+            return;
+
+        float alpha = Mathf.Clamp01(value);
+        fadeOverlay.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, alpha);
+    }
+
+    void ReturnToMainMenu()
+    {
+        _isEndGameInProgress = false;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
     /// <summary>
     /// Проверить, идет ли процесс окончания игры
     /// </summary>
@@ -299,8 +309,7 @@ public class EndGameManager : MonoBehaviour
     {
         StopAllCoroutines();
         _isEndGameInProgress = false;
-        _isFading = false;
-        _currentFadeTime = 0f;
+        _antidoteInjectedSuccessfully = false;
         _currentAntidoteTime = 0f;
         InitializeUI();
     }
