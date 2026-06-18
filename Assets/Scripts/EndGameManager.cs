@@ -252,7 +252,7 @@ public class EndGameManager : MonoBehaviour
         {
             time += Time.deltaTime;
             float alpha = Mathf.Lerp(startAlpha, 0f, Mathf.Clamp01(time / safeDuration));
-            UpdateFadeAlpha(alpha, true);
+            UpdateFadeAlpha(alpha);
             yield return null;
         }
         
@@ -285,12 +285,12 @@ public class EndGameManager : MonoBehaviour
         }
     }
 
-    void UpdateFadeAlpha(float value, bool directAlpha = false)
+    void UpdateFadeAlpha(float value)
     {
         if (fadeOverlay == null)
             return;
 
-        float alpha = directAlpha ? Mathf.Clamp01(value) : Mathf.Clamp01(value);
+        float alpha = Mathf.Clamp01(value);
         fadeOverlay.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, alpha);
     }
 
