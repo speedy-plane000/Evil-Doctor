@@ -10,8 +10,10 @@ public class SilentZone : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("TRIGGER ENTER: " + other.name + " | tag: " + other.tag);
+        
         PlayerRespawn respawn = PlayerRespawnResolver.ResolveFromCollider(other);
+        
+
         if (respawn == null) return;
 
         playerMovement = other.GetComponentInParent<PlayerMovement>();

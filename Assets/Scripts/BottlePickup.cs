@@ -17,8 +17,12 @@ public class BottlePickup : MonoBehaviour
     
     void OnTriggerEnter(Collider other)
     {
+        
+
+        Debug.Log("CameraZone hit by: " + other.name);
         if (_isPickedUp) return;
         if (!other.CompareTag("Player")) return;
+
         
         // Сообщаем EndGameManager, что антидот подобран
         var endGameManager = FindObjectOfType<EndGameManager>();
@@ -41,7 +45,8 @@ public class BottlePickup : MonoBehaviour
         // Показываем сообщение
         if (endGameManager != null && !string.IsNullOrEmpty(pickupMessage))
         {
-            endGameManager.ShowMessage(pickupMessage, messageDuration, Color.green);
+            if (NotificationUI.Instance != null)
+                NotificationUI.Instance.Show("Антидот подобран!", 3f, Color.green);
         }
 
         QuestData.CompleteAntidote();

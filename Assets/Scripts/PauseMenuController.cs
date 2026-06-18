@@ -28,6 +28,7 @@ public class PauseMenuController : MonoBehaviour
 
     void Awake()
     {
+        CacheGameplayComponents();
         CreateEventSystemIfNeeded();
         CacheGameplayComponents();
         uiFont = LoadFont();
@@ -43,17 +44,22 @@ public class PauseMenuController : MonoBehaviour
 
     void Update()
     {
-        if (Object.FindFirstObjectByType<StartMenuController>() != null)
+
+        var startMenu = Object.FindFirstObjectByType<StartMenuController>();
+        if (startMenu != null)
+        {
+            
             return;
+        }
 
         if (TaskStation.IsAnyTaskUiActive)
             return;
 
         if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            
             SetPauseState(!isPaused);
-
-        if (isPaused)
-            UpdateControlHints();
+        }
     }
 
     void CacheGameplayComponents()
@@ -74,6 +80,9 @@ public class PauseMenuController : MonoBehaviour
             overlayRoot.SetActive(pauseActive);
 
         Time.timeScale = pauseActive ? 0f : 1f;
+
+        bool startMenuActive = Object.FindFirstObjectByType<StartMenuController>() != null;
+
 
         foreach (PlayerMovement movement in playerMovements)
         {
@@ -378,15 +387,27 @@ public class PauseMenuController : MonoBehaviour
     }
 }
 
-public static class PauseMenuBootstrap
-{
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    static void CreatePauseMenuController()
-    {
-        if (Object.FindFirstObjectByType<PauseMenuController>() != null)
-            return;
+//public static class PauseMenuBootstrap
+//{
+//    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+//    static void CreatePauseMenuController()
+//    {
+//        var existing = Object.FindFirstObjectByType<PauseMenuController>(FindObjectsInactive.Include);
+//        Debug.Log("PauseBootstrap: existing = " + (existing == null ? "NULL" : existing.gameObject.name + " active=" + existing.gameObject.activeInHierarchy));
 
-        GameObject controllerObject = new GameObject("PauseMenuController");
-        controllerObject.AddComponent<PauseMenuController>();
-    }
-}
+//        if (existing != null && !existing.gameObject.activeInHierarchy)
+//        {
+//            Debug.Log("PauseBootstrap: уничтожаем старый");
+//            Object.Destroy(existing.gameObject);
+//        }
+//        else if (existing != null)
+//        {
+//            Debug.Log("PauseBootstrap: уже есть активный — пропускаем");
+//            return;
+//        }
+
+//        Debug.Log("PauseBootstrap: создаём новый");
+//        GameObject controllerObject = new GameObject("PauseMenuController");
+//        controllerObject.AddComponent<PauseMenuController>();
+//    }
+//}

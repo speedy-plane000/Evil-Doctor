@@ -26,16 +26,19 @@ public class CameraZone : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (isPermanentlyDisabledByRemote)
-            return;
+        Debug.Log("CameraZone: вошёл " + other.name);
 
         PlayerRespawn respawn = PlayerRespawnResolver.ResolveFromCollider(other);
-        if (respawn == null)
-            return;
-        if (respawn.IsCameraCheckpointProtectionActive)
-            return;
+        Debug.Log("CameraZone: respawn = " + (respawn == null ? "NULL" : respawn.name));
+
+        if (respawn == null) return;
+
+        Debug.Log("CameraZone: защита активна = " + respawn.IsCameraCheckpointProtectionActive);
+
+        if (respawn.IsCameraCheckpointProtectionActive) return;
 
         respawn.RespawnAtCheckpoint();
+
     }
 
     public void SetZoneActive(bool isActive)

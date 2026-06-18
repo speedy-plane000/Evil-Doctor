@@ -185,9 +185,11 @@ public class EndGameManager : MonoBehaviour
             ShowMessage(successMessage, 5f, successMessageColor);
             yield return StartCoroutine(FadeOutScreen(0.75f));
             Debug.Log("[EndGameManager] Игрок успешно сбежал!");
+            yield return new WaitForSecondsRealtime(returnToMenuDelayAfterBlack);
+            ReturnToMainMenu();
             yield break;
         }
-        
+
         // Если время вышло и антидот не введен
         if (_currentAntidoteTime <= 0 && _isEndGameInProgress)
         {

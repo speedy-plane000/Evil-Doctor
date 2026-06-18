@@ -5,17 +5,24 @@ using UnityEngine.UI;
 
 public class StartMenuController : MonoBehaviour
 {
-    const float IntroTextDurationSeconds = 13f;
+    // Время показа одного экрана теперь 6 секунд
+    const float IntroScreenDurationSeconds = 6f;
     const float IntroFadeOutDurationSeconds = 0.35f;
     const float DefaultSliderValue = 0.5f;
     const float MinMouseSensitivity = 100f;
     const float MaxMouseSensitivity = 700f;
-    const string IntroTextMessage =
+
+    // Первый текст (Механики)
+    const string IntroMechanicsText =
         "Меню - esc.\n" +
-        "В меню будет показано на какие кнопки нужно нажимать, чтобы взаимодействовать с предметами\n" +
-        "Вы проснулись в палате, в которой доктор ставил над вами эксперименты.\n " +
-        "Сбегите из больницы, пока он ненадолго ушёл.\n" + 
-        "Вы чувствуете слабость, на вас действует какой-то препарат. По возможности найдите антидот";
+        "В меню будет показано на какие кнопки нужно нажимать, чтобы взаимодействовать с предметами.\n\n" +
+        "Не попадайтесь на камеры (красные зоны) и не шумите в белых зонах.";
+
+    // Второй текст (Сюжет)
+    const string IntroStoryText =
+        "Вы проснулись в палате, в которой доктор ставил над вами эксперименты.\n" +
+        "Сбегите из больницы, пока он ненадолго ушёл.\n\n" +
+        "Вы чувствуете слабость, на вас действует какой-то препарат. По возможности найдите антидот.";
 
     CanvasGroup blackOverlayGroup;
     GameObject mainPanel;
@@ -186,19 +193,41 @@ public class StartMenuController : MonoBehaviour
     IEnumerator ShowIntroAndStartGame()
     {
         blackOverlayGroup.alpha = 1f;
-        if (introText != null)
-            introText.gameObject.SetActive(true);
 
+        // --- 1. ПОКАЗЫВАЕМ ПЕРВЫЙ ТЕКСТ (МЕХАНИКИ) ---
+        if (introText != null)
+        {
+            introText.gameObject.SetActive(true);
+            introText.text = IntroMechanicsText;
+        }
+
+        // Ждем 6 секунд
         float elapsed = 0f;
-        while (elapsed < IntroTextDurationSeconds)
+        while (elapsed < IntroScreenDurationSeconds)
         {
             elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
 
+        // --- 2. ПОКАЗЫВАЕМ ВТОРОЙ ТЕКСТ (СЮЖЕТ) ---
+        if (introText != null)
+        {
+            introText.text = IntroStoryText;
+        }
+
+        // Ждем еще 6 секунд
+        elapsed = 0f;
+        while (elapsed < IntroScreenDurationSeconds)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        // --- 3. ЗАВЕРШЕНИЕ ПОКАЗА ---
         if (introText != null)
             introText.gameObject.SetActive(false);
 
+        // Плавное исчезновение черного экрана
         elapsed = 0f;
         while (elapsed < IntroFadeOutDurationSeconds)
         {
@@ -214,7 +243,8 @@ public class StartMenuController : MonoBehaviour
 
     void BuildIntroText(Transform parent)
     {
-        introText = CreateText("IntroText", parent, IntroTextMessage, 40, TextAnchor.MiddleCenter);
+        // Оставляем текст изначально пустым, так как он задается в корутине
+        introText = CreateText("IntroText", parent, "", 40, TextAnchor.MiddleCenter);
         introText.horizontalOverflow = HorizontalWrapMode.Wrap;
         introText.verticalOverflow = VerticalWrapMode.Overflow;
         SetRect(introText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400f, 520f));
@@ -411,8 +441,12 @@ public static class StartMenuBootstrap
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void CreateStartMenu()
     {
-        if (Object.FindFirstObjectByType<StartMenuController>() != null)
+        var existing = Object.FindFirstObjectByType<StartMenuController>();
+        if (existing != null)
+        {
+            Debug.Log("StartMenuBootstrap: уже есть на " + existing.gameObject.name);
             return;
+        }
 
         GameObject menuObject = new GameObject("StartMenuController");
         menuObject.AddComponent<StartMenuController>();
